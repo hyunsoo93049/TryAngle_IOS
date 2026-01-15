@@ -1,0 +1,1042 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		01D26C9790741D5F08E2B47A48D79331 /* onnxruntime-c */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 1FAA34C873E6D52B09F47086906FF3E4 /* Build configuration list for PBXAggregateTarget "onnxruntime-c" */;
+			buildPhases = (
+				3CFBA14174592D8554CB04535DA6DCD3 /* [CP] Copy XCFrameworks */,
+			);
+			dependencies = (
+			);
+			name = "onnxruntime-c";
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		00284541372A832BB99C7687DF7293F3 /* ort_session.mm in Sources */ = {isa = PBXBuildFile; fileRef = 30994AD685847E70D39B30989AC9D978 /* ort_session.mm */; settings = {COMPILER_FLAGS = "-std=c++17 -fobjc-arc-exceptions -Wall -Wextra -Werror"; }; };
+		04A098FFE4DABE4F287FB34FA1A8569B /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 384DDA2CB25005BD6479B5987C619DD4 /* Foundation.framework */; };
+		200B4327DFFE28672467BEBA6AA31CD9 /* ort_env_internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 2EE6443DDE3CB677B6F4D60CE12F352C /* ort_env_internal.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		350CACD2A01A7C903BD6F30A461E4891 /* ort_enums.h in Headers */ = {isa = PBXBuildFile; fileRef = B29616549AE95A1356B2FDBD2BE16CF3 /* ort_enums.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		3B1A5C90523260A060D533D84F1D1FE5 /* ort_coreml_execution_provider.h in Headers */ = {isa = PBXBuildFile; fileRef = D4D8772DA1C4FDF00B22BA91F6A22037 /* ort_coreml_execution_provider.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5896495FF327B0289B2D93DFA90C4D49 /* ort_xnnpack_execution_provider.h in Headers */ = {isa = PBXBuildFile; fileRef = FAE8E0F4E36E42622D882AAF2137279D /* ort_xnnpack_execution_provider.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5C8E554F2213581B5C11746BCB438801 /* Pods-TryAngleApp-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = D9FD0D137D1FB320ADEFB22B74701BE1 /* Pods-TryAngleApp-dummy.m */; };
+		621C8147E2E0C7C8803B0F086B167E67 /* assert_arc_enabled.mm in Sources */ = {isa = PBXBuildFile; fileRef = 099F01DF693FF221ADB1B831E4AADF1C /* assert_arc_enabled.mm */; settings = {COMPILER_FLAGS = "-std=c++17 -fobjc-arc-exceptions -Wall -Wextra -Werror"; }; };
+		63B96C30A94777FEDA481D85F00BDBDA /* onnxruntime-objc-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 6BF8176111364C4D6ED2274A222427B5 /* onnxruntime-objc-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		760E22D11A9E012B08829621C72F96B6 /* ort_env.h in Headers */ = {isa = PBXBuildFile; fileRef = 7D0C35657E25905F8F8E5896E201DEDD /* ort_env.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		77FCC6D101016903CFABB7D780AC4258 /* ort_coreml_execution_provider.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4EE18357A5B18E67166E770B27521217 /* ort_coreml_execution_provider.mm */; settings = {COMPILER_FLAGS = "-std=c++17 -fobjc-arc-exceptions -Wall -Wextra -Werror"; }; };
+		7E48AA894F0B8C3F9657B103532BA931 /* ort_session.h in Headers */ = {isa = PBXBuildFile; fileRef = 1B80443294ED1A45F3F7A630850A77D4 /* ort_session.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		84E2856C3664AD1636654CADBAC5E53C /* ort_value_internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 36B0AADBDD0E7358045849231BA0ABDD /* ort_value_internal.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		93C08F89A01A96AF2479138D10D3CA90 /* error_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = DDB8EEC865E6E64B2E6CC3F82EF18C61 /* error_utils.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		9563531552C0C2E4228CEE823F5CD822 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 384DDA2CB25005BD6479B5987C619DD4 /* Foundation.framework */; };
+		97E3068E6503791510A94986C4726F16 /* ort_enums_internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 80C8E17E8A38D36C7AF02DE440BA22F0 /* ort_enums_internal.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		9A316046D5B60F59ECE494AA7374AAB5 /* onnxruntime-objc-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = D6DE1C57F5E9D877D377918B19FE6F08 /* onnxruntime-objc-dummy.m */; };
+		AD4953A6A7277BE2E8253BEEE944A41B /* Pods-TryAngleApp-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = F89180ACD03206FC6F986EDFB1901869 /* Pods-TryAngleApp-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		B0EAADD9280224B2E4021013FAD41815 /* cxx_utils.h in Headers */ = {isa = PBXBuildFile; fileRef = AC69FB2BC668657FDEFD9F842FB0780B /* cxx_utils.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		CCEF26BEA7D8F40290C9753488916A37 /* ort_enums.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9DD77CABB09053CDD11B5ED122CD56F1 /* ort_enums.mm */; settings = {COMPILER_FLAGS = "-std=c++17 -fobjc-arc-exceptions -Wall -Wextra -Werror"; }; };
+		CE5A23981789290C4A8AC40238789542 /* ort_value.h in Headers */ = {isa = PBXBuildFile; fileRef = A5D9620872406111DDAB009E1FF654A4 /* ort_value.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D709F471A8D831260FBFB89B2EDE9034 /* ort_env.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2910734314895452C9CE008B89266F28 /* ort_env.mm */; settings = {COMPILER_FLAGS = "-std=c++17 -fobjc-arc-exceptions -Wall -Wextra -Werror"; }; };
+		D89FDEFB2F6D12CE7FC41BF4FBBC10FD /* error_utils.mm in Sources */ = {isa = PBXBuildFile; fileRef = B7B82991948EFE2BA59E688FB4DEDDC0 /* error_utils.mm */; settings = {COMPILER_FLAGS = "-std=c++17 -fobjc-arc-exceptions -Wall -Wextra -Werror"; }; };
+		DF8AE0D1F1F9A20AFBF6334E19362226 /* cxx_api.h in Headers */ = {isa = PBXBuildFile; fileRef = AC2F56606CB32923AC9F970871B76514 /* cxx_api.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		E571BFFDAF02640D4B64FFFD4E87C3AF /* onnxruntime.h in Headers */ = {isa = PBXBuildFile; fileRef = 2172361C8898E55DEEB41F5689045345 /* onnxruntime.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E5A8B55C91ABA4A336C82C889373C473 /* ort_custom_op_registration.h in Headers */ = {isa = PBXBuildFile; fileRef = F7321F82E47A36DDF8E870EC1B24264C /* ort_custom_op_registration.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E88F4CC15408A0300C287CC4EC4FFDB1 /* ort_session_internal.h in Headers */ = {isa = PBXBuildFile; fileRef = CC75496CBBC96A96F775CD3697DA4784 /* ort_session_internal.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		EDA6403B1C04394A1AA06E516538E0F9 /* cxx_utils.mm in Sources */ = {isa = PBXBuildFile; fileRef = 7521DEE49D393BCDAEE619BF595FA3AB /* cxx_utils.mm */; settings = {COMPILER_FLAGS = "-std=c++17 -fobjc-arc-exceptions -Wall -Wextra -Werror"; }; };
+		EECD6DC5DAA22C9039700E8619E71A82 /* ort_value.mm in Sources */ = {isa = PBXBuildFile; fileRef = E826AD09FCA0A7E0688B37AA7E899F47 /* ort_value.mm */; settings = {COMPILER_FLAGS = "-std=c++17 -fobjc-arc-exceptions -Wall -Wextra -Werror"; }; };
+		F21A1B6F72973D0F43A44FC5F5CE8547 /* ort_xnnpack_execution_provider.mm in Sources */ = {isa = PBXBuildFile; fileRef = 68052068ED87A59D27736C7DB9376939 /* ort_xnnpack_execution_provider.mm */; settings = {COMPILER_FLAGS = "-std=c++17 -fobjc-arc-exceptions -Wall -Wextra -Werror"; }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		4BEDA4A8F7FA1871274C72BFC1265710 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 01D26C9790741D5F08E2B47A48D79331;
+			remoteInfo = "onnxruntime-c";
+		};
+		D3712CA3385CA400A49945291C893661 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DD8A7EE9BACB64198DBBF12EA5122AC8;
+			remoteInfo = "onnxruntime-objc";
+		};
+		EAD0173990C6A127636CD9E835962232 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 01D26C9790741D5F08E2B47A48D79331;
+			remoteInfo = "onnxruntime-c";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		065D2B7CEA8792BE16E92DF2C6A9A8DE /* onnxruntime_session_options_config_keys.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = onnxruntime_session_options_config_keys.h; path = Headers/onnxruntime_session_options_config_keys.h; sourceTree = "<group>"; };
+		082E06F2F31713C1EE31F8E663F82DFD /* onnxruntime-objc.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "onnxruntime-objc.debug.xcconfig"; sourceTree = "<group>"; };
+		099F01DF693FF221ADB1B831E4AADF1C /* assert_arc_enabled.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = assert_arc_enabled.mm; path = objectivec/assert_arc_enabled.mm; sourceTree = "<group>"; };
+		1B80443294ED1A45F3F7A630850A77D4 /* ort_session.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ort_session.h; path = objectivec/include/ort_session.h; sourceTree = "<group>"; };
+		1EF13EF144459801884E867DABC44726 /* onnxruntime_cxx_inline.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = onnxruntime_cxx_inline.h; path = Headers/onnxruntime_cxx_inline.h; sourceTree = "<group>"; };
+		2172361C8898E55DEEB41F5689045345 /* onnxruntime.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = onnxruntime.h; path = objectivec/include/onnxruntime.h; sourceTree = "<group>"; };
+		2910734314895452C9CE008B89266F28 /* ort_env.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = ort_env.mm; path = objectivec/ort_env.mm; sourceTree = "<group>"; };
+		2EE6443DDE3CB677B6F4D60CE12F352C /* ort_env_internal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ort_env_internal.h; path = objectivec/ort_env_internal.h; sourceTree = "<group>"; };
+		30994AD685847E70D39B30989AC9D978 /* ort_session.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = ort_session.mm; path = objectivec/ort_session.mm; sourceTree = "<group>"; };
+		36B0AADBDD0E7358045849231BA0ABDD /* ort_value_internal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ort_value_internal.h; path = objectivec/ort_value_internal.h; sourceTree = "<group>"; };
+		384DDA2CB25005BD6479B5987C619DD4 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		3D78539A5CA9EC7E409EFC4A1FCAB5AB /* onnxruntime_lite_custom_op.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = onnxruntime_lite_custom_op.h; path = Headers/onnxruntime_lite_custom_op.h; sourceTree = "<group>"; };
+		4A1A0871B6ED99A1692FA8550B186630 /* cpu_provider_factory.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = cpu_provider_factory.h; path = Headers/cpu_provider_factory.h; sourceTree = "<group>"; };
+		4E196F3822FC7D6934C9A210D35410A1 /* onnxruntime-c-xcframeworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "onnxruntime-c-xcframeworks.sh"; sourceTree = "<group>"; };
+		4EE18357A5B18E67166E770B27521217 /* ort_coreml_execution_provider.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = ort_coreml_execution_provider.mm; path = objectivec/ort_coreml_execution_provider.mm; sourceTree = "<group>"; };
+		506FE192BF32C5B513D7E62792F74417 /* onnxruntime-objc-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "onnxruntime-objc-Info.plist"; sourceTree = "<group>"; };
+		50A7E034354E91E58A3BC823F5568F5C /* onnxruntime-c.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "onnxruntime-c.debug.xcconfig"; sourceTree = "<group>"; };
+		535048539369BC72021895932BFB0A23 /* onnxruntime_cxx_api.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = onnxruntime_cxx_api.h; path = Headers/onnxruntime_cxx_api.h; sourceTree = "<group>"; };
+		5730B94F3F3D449D666CFDAA9C5F4079 /* coreml_provider_factory.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = coreml_provider_factory.h; path = Headers/coreml_provider_factory.h; sourceTree = "<group>"; };
+		5F48D77E10D5B30766F61E1DA3FAA0AC /* Pods-TryAngleApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-TryAngleApp.debug.xcconfig"; sourceTree = "<group>"; };
+		5F87724F3AFACE57551F64AA88DACFB8 /* onnxruntime_ep_device_ep_metadata_keys.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = onnxruntime_ep_device_ep_metadata_keys.h; path = Headers/onnxruntime_ep_device_ep_metadata_keys.h; sourceTree = "<group>"; };
+		6759305BB2A579B41664A92A76F61806 /* Pods-TryAngleApp-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-TryAngleApp-Info.plist"; sourceTree = "<group>"; };
+		67A3E1A5DE0AA87C83AD712957C36322 /* Pods-TryAngleApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-TryAngleApp.release.xcconfig"; sourceTree = "<group>"; };
+		68052068ED87A59D27736C7DB9376939 /* ort_xnnpack_execution_provider.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = ort_xnnpack_execution_provider.mm; path = objectivec/ort_xnnpack_execution_provider.mm; sourceTree = "<group>"; };
+		6BF8176111364C4D6ED2274A222427B5 /* onnxruntime-objc-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "onnxruntime-objc-umbrella.h"; sourceTree = "<group>"; };
+		6ED2874753270C959CD82568B26B876D /* onnxruntime_ep_c_api.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = onnxruntime_ep_c_api.h; path = Headers/onnxruntime_ep_c_api.h; sourceTree = "<group>"; };
+		7521DEE49D393BCDAEE619BF595FA3AB /* cxx_utils.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = cxx_utils.mm; path = objectivec/cxx_utils.mm; sourceTree = "<group>"; };
+		7D0C35657E25905F8F8E5896E201DEDD /* ort_env.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ort_env.h; path = objectivec/include/ort_env.h; sourceTree = "<group>"; };
+		80C8E17E8A38D36C7AF02DE440BA22F0 /* ort_enums_internal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ort_enums_internal.h; path = objectivec/ort_enums_internal.h; sourceTree = "<group>"; };
+		85390E32C658ED1678866232B6CE57E6 /* onnxruntime_float16.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = onnxruntime_float16.h; path = Headers/onnxruntime_float16.h; sourceTree = "<group>"; };
+		9D940727FF8FB9C785EB98E56350EF41 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		9DD77CABB09053CDD11B5ED122CD56F1 /* ort_enums.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = ort_enums.mm; path = objectivec/ort_enums.mm; sourceTree = "<group>"; };
+		A3B11159CCA18F05EFC05755CF34DA48 /* onnxruntime-c.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "onnxruntime-c.release.xcconfig"; sourceTree = "<group>"; };
+		A5D9620872406111DDAB009E1FF654A4 /* ort_value.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ort_value.h; path = objectivec/include/ort_value.h; sourceTree = "<group>"; };
+		AAD7B73D3DF6AEE9A5D1DB8D6964F439 /* onnxruntime_run_options_config_keys.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = onnxruntime_run_options_config_keys.h; path = Headers/onnxruntime_run_options_config_keys.h; sourceTree = "<group>"; };
+		AC2F56606CB32923AC9F970871B76514 /* cxx_api.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = cxx_api.h; path = objectivec/cxx_api.h; sourceTree = "<group>"; };
+		AC69FB2BC668657FDEFD9F842FB0780B /* cxx_utils.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = cxx_utils.h; path = objectivec/cxx_utils.h; sourceTree = "<group>"; };
+		AF44BE896BEBBE099592D03904279C1C /* onnxruntime-objc */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "onnxruntime-objc"; path = onnxruntime_objc.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B1C01C41C19653AAE004952AB8DB2D88 /* Pods-TryAngleApp.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-TryAngleApp.modulemap"; sourceTree = "<group>"; };
+		B29616549AE95A1356B2FDBD2BE16CF3 /* ort_enums.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ort_enums.h; path = objectivec/include/ort_enums.h; sourceTree = "<group>"; };
+		B7B82991948EFE2BA59E688FB4DEDDC0 /* error_utils.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = error_utils.mm; path = objectivec/error_utils.mm; sourceTree = "<group>"; };
+		C43DA28B26D056F076C43A8D518AB01C /* Pods-TryAngleApp-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-TryAngleApp-acknowledgements.plist"; sourceTree = "<group>"; };
+		CC75496CBBC96A96F775CD3697DA4784 /* ort_session_internal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ort_session_internal.h; path = objectivec/ort_session_internal.h; sourceTree = "<group>"; };
+		D31A4D662C9F6522B190024E29B7ED2A /* onnxruntime.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; path = onnxruntime.xcframework; sourceTree = "<group>"; };
+		D4D8772DA1C4FDF00B22BA91F6A22037 /* ort_coreml_execution_provider.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ort_coreml_execution_provider.h; path = objectivec/include/ort_coreml_execution_provider.h; sourceTree = "<group>"; };
+		D6DE1C57F5E9D877D377918B19FE6F08 /* onnxruntime-objc-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "onnxruntime-objc-dummy.m"; sourceTree = "<group>"; };
+		D9FD0D137D1FB320ADEFB22B74701BE1 /* Pods-TryAngleApp-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-TryAngleApp-dummy.m"; sourceTree = "<group>"; };
+		DDB8EEC865E6E64B2E6CC3F82EF18C61 /* error_utils.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = error_utils.h; path = objectivec/error_utils.h; sourceTree = "<group>"; };
+		E44004BD80185F59E5F767B809866EF7 /* onnxruntime_c_api.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = onnxruntime_c_api.h; path = Headers/onnxruntime_c_api.h; sourceTree = "<group>"; };
+		E826AD09FCA0A7E0688B37AA7E899F47 /* ort_value.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = ort_value.mm; path = objectivec/ort_value.mm; sourceTree = "<group>"; };
+		E92BD81CB82E8AE22B29AE1E0E93F1C7 /* Pods-TryAngleApp */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "Pods-TryAngleApp"; path = Pods_TryAngleApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F1A396C1162A40791E0AD85CBB379F96 /* onnxruntime-objc.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "onnxruntime-objc.release.xcconfig"; sourceTree = "<group>"; };
+		F2848B36B6E43B2C1EF985CBBE0B0F1C /* onnxruntime-objc-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "onnxruntime-objc-prefix.pch"; sourceTree = "<group>"; };
+		F6844C63FC9B627663517B7BABA1685B /* Pods-TryAngleApp-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-TryAngleApp-acknowledgements.markdown"; sourceTree = "<group>"; };
+		F7321F82E47A36DDF8E870EC1B24264C /* ort_custom_op_registration.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ort_custom_op_registration.h; path = objectivec/include/ort_custom_op_registration.h; sourceTree = "<group>"; };
+		F794AC12BC8C587E3016D3B306EC07EC /* onnxruntime-objc.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "onnxruntime-objc.modulemap"; sourceTree = "<group>"; };
+		F89180ACD03206FC6F986EDFB1901869 /* Pods-TryAngleApp-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-TryAngleApp-umbrella.h"; sourceTree = "<group>"; };
+		FAE8E0F4E36E42622D882AAF2137279D /* ort_xnnpack_execution_provider.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ort_xnnpack_execution_provider.h; path = objectivec/include/ort_xnnpack_execution_provider.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		0B84E22CCCDB903EDE372C60A40680BF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				04A098FFE4DABE4F287FB34FA1A8569B /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B5BE884D7290D5AF9E62832DF412DE2D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9563531552C0C2E4228CEE823F5CD822 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		02FAC3277A5164F4711975BD0948DF1C /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				099F01DF693FF221ADB1B831E4AADF1C /* assert_arc_enabled.mm */,
+				AC2F56606CB32923AC9F970871B76514 /* cxx_api.h */,
+				AC69FB2BC668657FDEFD9F842FB0780B /* cxx_utils.h */,
+				7521DEE49D393BCDAEE619BF595FA3AB /* cxx_utils.mm */,
+				DDB8EEC865E6E64B2E6CC3F82EF18C61 /* error_utils.h */,
+				B7B82991948EFE2BA59E688FB4DEDDC0 /* error_utils.mm */,
+				2172361C8898E55DEEB41F5689045345 /* onnxruntime.h */,
+				D4D8772DA1C4FDF00B22BA91F6A22037 /* ort_coreml_execution_provider.h */,
+				4EE18357A5B18E67166E770B27521217 /* ort_coreml_execution_provider.mm */,
+				F7321F82E47A36DDF8E870EC1B24264C /* ort_custom_op_registration.h */,
+				B29616549AE95A1356B2FDBD2BE16CF3 /* ort_enums.h */,
+				9DD77CABB09053CDD11B5ED122CD56F1 /* ort_enums.mm */,
+				80C8E17E8A38D36C7AF02DE440BA22F0 /* ort_enums_internal.h */,
+				7D0C35657E25905F8F8E5896E201DEDD /* ort_env.h */,
+				2910734314895452C9CE008B89266F28 /* ort_env.mm */,
+				2EE6443DDE3CB677B6F4D60CE12F352C /* ort_env_internal.h */,
+				1B80443294ED1A45F3F7A630850A77D4 /* ort_session.h */,
+				30994AD685847E70D39B30989AC9D978 /* ort_session.mm */,
+				CC75496CBBC96A96F775CD3697DA4784 /* ort_session_internal.h */,
+				A5D9620872406111DDAB009E1FF654A4 /* ort_value.h */,
+				E826AD09FCA0A7E0688B37AA7E899F47 /* ort_value.mm */,
+				36B0AADBDD0E7358045849231BA0ABDD /* ort_value_internal.h */,
+				FAE8E0F4E36E42622D882AAF2137279D /* ort_xnnpack_execution_provider.h */,
+				68052068ED87A59D27736C7DB9376939 /* ort_xnnpack_execution_provider.mm */,
+			);
+			name = Core;
+			sourceTree = "<group>";
+		};
+		180F53DD1A224B99649408A753381929 /* onnxruntime-objc */ = {
+			isa = PBXGroup;
+			children = (
+				02FAC3277A5164F4711975BD0948DF1C /* Core */,
+				87F0280EC2806B4D1FBE2B7ED3A8A667 /* Support Files */,
+			);
+			name = "onnxruntime-objc";
+			path = "onnxruntime-objc";
+			sourceTree = "<group>";
+		};
+		296F6EF130ADA346FBE858A3FFAED0D2 /* Targets Support Files */ = {
+			isa = PBXGroup;
+			children = (
+				EE934E5AA92A98A76339382460D350CB /* Pods-TryAngleApp */,
+			);
+			name = "Targets Support Files";
+			sourceTree = "<group>";
+		};
+		2B09475C0D7446F33D1B69653B2280B9 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				AF44BE896BEBBE099592D03904279C1C /* onnxruntime-objc */,
+				E92BD81CB82E8AE22B29AE1E0E93F1C7 /* Pods-TryAngleApp */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		333D81D6AE8E59E1158EB6C2B309E046 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D31A4D662C9F6522B190024E29B7ED2A /* onnxruntime.xcframework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		33EA9D9FD73A3588683591DD29CBF6A3 /* Support Files */ = {
+			isa = PBXGroup;
+			children = (
+				4E196F3822FC7D6934C9A210D35410A1 /* onnxruntime-c-xcframeworks.sh */,
+				50A7E034354E91E58A3BC823F5568F5C /* onnxruntime-c.debug.xcconfig */,
+				A3B11159CCA18F05EFC05755CF34DA48 /* onnxruntime-c.release.xcconfig */,
+			);
+			name = "Support Files";
+			path = "../Target Support Files/onnxruntime-c";
+			sourceTree = "<group>";
+		};
+		3EED74B43B7D46A5F6C18C49A034D73E /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				7CADFD3531275A38D5976564BA6690D0 /* onnxruntime-c */,
+				180F53DD1A224B99649408A753381929 /* onnxruntime-objc */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+		7CADFD3531275A38D5976564BA6690D0 /* onnxruntime-c */ = {
+			isa = PBXGroup;
+			children = (
+				5730B94F3F3D449D666CFDAA9C5F4079 /* coreml_provider_factory.h */,
+				4A1A0871B6ED99A1692FA8550B186630 /* cpu_provider_factory.h */,
+				E44004BD80185F59E5F767B809866EF7 /* onnxruntime_c_api.h */,
+				535048539369BC72021895932BFB0A23 /* onnxruntime_cxx_api.h */,
+				1EF13EF144459801884E867DABC44726 /* onnxruntime_cxx_inline.h */,
+				6ED2874753270C959CD82568B26B876D /* onnxruntime_ep_c_api.h */,
+				5F87724F3AFACE57551F64AA88DACFB8 /* onnxruntime_ep_device_ep_metadata_keys.h */,
+				85390E32C658ED1678866232B6CE57E6 /* onnxruntime_float16.h */,
+				3D78539A5CA9EC7E409EFC4A1FCAB5AB /* onnxruntime_lite_custom_op.h */,
+				AAD7B73D3DF6AEE9A5D1DB8D6964F439 /* onnxruntime_run_options_config_keys.h */,
+				065D2B7CEA8792BE16E92DF2C6A9A8DE /* onnxruntime_session_options_config_keys.h */,
+				333D81D6AE8E59E1158EB6C2B309E046 /* Frameworks */,
+				33EA9D9FD73A3588683591DD29CBF6A3 /* Support Files */,
+			);
+			name = "onnxruntime-c";
+			path = "onnxruntime-c";
+			sourceTree = "<group>";
+		};
+		87F0280EC2806B4D1FBE2B7ED3A8A667 /* Support Files */ = {
+			isa = PBXGroup;
+			children = (
+				F794AC12BC8C587E3016D3B306EC07EC /* onnxruntime-objc.modulemap */,
+				D6DE1C57F5E9D877D377918B19FE6F08 /* onnxruntime-objc-dummy.m */,
+				506FE192BF32C5B513D7E62792F74417 /* onnxruntime-objc-Info.plist */,
+				F2848B36B6E43B2C1EF985CBBE0B0F1C /* onnxruntime-objc-prefix.pch */,
+				6BF8176111364C4D6ED2274A222427B5 /* onnxruntime-objc-umbrella.h */,
+				082E06F2F31713C1EE31F8E663F82DFD /* onnxruntime-objc.debug.xcconfig */,
+				F1A396C1162A40791E0AD85CBB379F96 /* onnxruntime-objc.release.xcconfig */,
+			);
+			name = "Support Files";
+			path = "../Target Support Files/onnxruntime-objc";
+			sourceTree = "<group>";
+		};
+		CF1408CF629C7361332E53B88F7BD30C = {
+			isa = PBXGroup;
+			children = (
+				9D940727FF8FB9C785EB98E56350EF41 /* Podfile */,
+				D210D550F4EA176C3123ED886F8F87F5 /* Frameworks */,
+				3EED74B43B7D46A5F6C18C49A034D73E /* Pods */,
+				2B09475C0D7446F33D1B69653B2280B9 /* Products */,
+				296F6EF130ADA346FBE858A3FFAED0D2 /* Targets Support Files */,
+			);
+			sourceTree = "<group>";
+		};
+		D210D550F4EA176C3123ED886F8F87F5 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E4801F62A6B08CD9B5410329F1A18FDE /* iOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E4801F62A6B08CD9B5410329F1A18FDE /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				384DDA2CB25005BD6479B5987C619DD4 /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		EE934E5AA92A98A76339382460D350CB /* Pods-TryAngleApp */ = {
+			isa = PBXGroup;
+			children = (
+				B1C01C41C19653AAE004952AB8DB2D88 /* Pods-TryAngleApp.modulemap */,
+				F6844C63FC9B627663517B7BABA1685B /* Pods-TryAngleApp-acknowledgements.markdown */,
+				C43DA28B26D056F076C43A8D518AB01C /* Pods-TryAngleApp-acknowledgements.plist */,
+				D9FD0D137D1FB320ADEFB22B74701BE1 /* Pods-TryAngleApp-dummy.m */,
+				6759305BB2A579B41664A92A76F61806 /* Pods-TryAngleApp-Info.plist */,
+				F89180ACD03206FC6F986EDFB1901869 /* Pods-TryAngleApp-umbrella.h */,
+				5F48D77E10D5B30766F61E1DA3FAA0AC /* Pods-TryAngleApp.debug.xcconfig */,
+				67A3E1A5DE0AA87C83AD712957C36322 /* Pods-TryAngleApp.release.xcconfig */,
+			);
+			name = "Pods-TryAngleApp";
+			path = "Target Support Files/Pods-TryAngleApp";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		205B0F5015D132991DF562C0FF483EBE /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AD4953A6A7277BE2E8253BEEE944A41B /* Pods-TryAngleApp-umbrella.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA16369D4CCD14BFA9871C26AF38F80C /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DF8AE0D1F1F9A20AFBF6334E19362226 /* cxx_api.h in Headers */,
+				B0EAADD9280224B2E4021013FAD41815 /* cxx_utils.h in Headers */,
+				93C08F89A01A96AF2479138D10D3CA90 /* error_utils.h in Headers */,
+				E571BFFDAF02640D4B64FFFD4E87C3AF /* onnxruntime.h in Headers */,
+				63B96C30A94777FEDA481D85F00BDBDA /* onnxruntime-objc-umbrella.h in Headers */,
+				3B1A5C90523260A060D533D84F1D1FE5 /* ort_coreml_execution_provider.h in Headers */,
+				E5A8B55C91ABA4A336C82C889373C473 /* ort_custom_op_registration.h in Headers */,
+				350CACD2A01A7C903BD6F30A461E4891 /* ort_enums.h in Headers */,
+				97E3068E6503791510A94986C4726F16 /* ort_enums_internal.h in Headers */,
+				760E22D11A9E012B08829621C72F96B6 /* ort_env.h in Headers */,
+				200B4327DFFE28672467BEBA6AA31CD9 /* ort_env_internal.h in Headers */,
+				7E48AA894F0B8C3F9657B103532BA931 /* ort_session.h in Headers */,
+				E88F4CC15408A0300C287CC4EC4FFDB1 /* ort_session_internal.h in Headers */,
+				CE5A23981789290C4A8AC40238789542 /* ort_value.h in Headers */,
+				84E2856C3664AD1636654CADBAC5E53C /* ort_value_internal.h in Headers */,
+				5896495FF327B0289B2D93DFA90C4D49 /* ort_xnnpack_execution_provider.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		B4BF249ADC5AE4586B5FA710EED8DEF8 /* Pods-TryAngleApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D49579B94B13F71C7D4645B36B1A6DFA /* Build configuration list for PBXNativeTarget "Pods-TryAngleApp" */;
+			buildPhases = (
+				205B0F5015D132991DF562C0FF483EBE /* Headers */,
+				F5C0424B3BFD39DF542FA29A385AF722 /* Sources */,
+				B5BE884D7290D5AF9E62832DF412DE2D /* Frameworks */,
+				838028D8CB128787CBAB02C6DA502ECF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7CB3EBD3498678FC667BBFC5E73E31E1 /* PBXTargetDependency */,
+				834164D622077F8EBF8A6CEBB65222D2 /* PBXTargetDependency */,
+			);
+			name = "Pods-TryAngleApp";
+			productName = Pods_TryAngleApp;
+			productReference = E92BD81CB82E8AE22B29AE1E0E93F1C7 /* Pods-TryAngleApp */;
+			productType = "com.apple.product-type.framework";
+		};
+		DD8A7EE9BACB64198DBBF12EA5122AC8 /* onnxruntime-objc */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 639C65AE92756E2E984BEBD55988678B /* Build configuration list for PBXNativeTarget "onnxruntime-objc" */;
+			buildPhases = (
+				AA16369D4CCD14BFA9871C26AF38F80C /* Headers */,
+				E47317D5948639745CC51AEC1757B42C /* Sources */,
+				0B84E22CCCDB903EDE372C60A40680BF /* Frameworks */,
+				67B357B0034C312ECBF3B45B58626A99 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				18F847A7944BFBCB892453DE8242D99C /* PBXTargetDependency */,
+			);
+			name = "onnxruntime-objc";
+			productName = onnxruntime_objc;
+			productReference = AF44BE896BEBBE099592D03904279C1C /* onnxruntime-objc */;
+			productType = "com.apple.product-type.framework";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		BFDFE7DC352907FC980B868725387E98 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+			};
+			buildConfigurationList = 4821239608C13582E20E6DA73FD5F1F9 /* Build configuration list for PBXProject "Pods" */;
+			compatibilityVersion = "Xcode 16.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = CF1408CF629C7361332E53B88F7BD30C;
+			minimizedProjectReferenceProxies = 0;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 2B09475C0D7446F33D1B69653B2280B9 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				01D26C9790741D5F08E2B47A48D79331 /* onnxruntime-c */,
+				DD8A7EE9BACB64198DBBF12EA5122AC8 /* onnxruntime-objc */,
+				B4BF249ADC5AE4586B5FA710EED8DEF8 /* Pods-TryAngleApp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		67B357B0034C312ECBF3B45B58626A99 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		838028D8CB128787CBAB02C6DA502ECF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		3CFBA14174592D8554CB04535DA6DCD3 /* [CP] Copy XCFrameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/onnxruntime-c/onnxruntime-c-xcframeworks-input-files.xcfilelist",
+			);
+			name = "[CP] Copy XCFrameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/onnxruntime-c/onnxruntime-c-xcframeworks-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/onnxruntime-c/onnxruntime-c-xcframeworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		E47317D5948639745CC51AEC1757B42C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				621C8147E2E0C7C8803B0F086B167E67 /* assert_arc_enabled.mm in Sources */,
+				EDA6403B1C04394A1AA06E516538E0F9 /* cxx_utils.mm in Sources */,
+				D89FDEFB2F6D12CE7FC41BF4FBBC10FD /* error_utils.mm in Sources */,
+				9A316046D5B60F59ECE494AA7374AAB5 /* onnxruntime-objc-dummy.m in Sources */,
+				77FCC6D101016903CFABB7D780AC4258 /* ort_coreml_execution_provider.mm in Sources */,
+				CCEF26BEA7D8F40290C9753488916A37 /* ort_enums.mm in Sources */,
+				D709F471A8D831260FBFB89B2EDE9034 /* ort_env.mm in Sources */,
+				00284541372A832BB99C7687DF7293F3 /* ort_session.mm in Sources */,
+				EECD6DC5DAA22C9039700E8619E71A82 /* ort_value.mm in Sources */,
+				F21A1B6F72973D0F43A44FC5F5CE8547 /* ort_xnnpack_execution_provider.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F5C0424B3BFD39DF542FA29A385AF722 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5C8E554F2213581B5C11746BCB438801 /* Pods-TryAngleApp-dummy.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		18F847A7944BFBCB892453DE8242D99C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "onnxruntime-c";
+			target = 01D26C9790741D5F08E2B47A48D79331 /* onnxruntime-c */;
+			targetProxy = EAD0173990C6A127636CD9E835962232 /* PBXContainerItemProxy */;
+		};
+		7CB3EBD3498678FC667BBFC5E73E31E1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "onnxruntime-c";
+			target = 01D26C9790741D5F08E2B47A48D79331 /* onnxruntime-c */;
+			targetProxy = 4BEDA4A8F7FA1871274C72BFC1265710 /* PBXContainerItemProxy */;
+		};
+		834164D622077F8EBF8A6CEBB65222D2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "onnxruntime-objc";
+			target = DD8A7EE9BACB64198DBBF12EA5122AC8 /* onnxruntime-objc */;
+			targetProxy = D3712CA3385CA400A49945291C893661 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		296F86E0DD688C440F8EB2FD9C0415AF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"POD_CONFIGURATION_DEBUG=1",
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRIP_INSTALLED_PRODUCT = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				SYMROOT = "${SRCROOT}/../build";
+			};
+			name = Debug;
+		};
+		2FB25BDB6662EBAE530ADBEE947081AB /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 67A3E1A5DE0AA87C83AD712957C36322 /* Pods-TryAngleApp.release.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = "Target Support Files/Pods-TryAngleApp/Pods-TryAngleApp-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/Pods-TryAngleApp/Pods-TryAngleApp.modulemap";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		589D90111CF1F8BCC706D61ADC4B04AC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 082E06F2F31713C1EE31F8E663F82DFD /* onnxruntime-objc.debug.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREFIX_HEADER = "Target Support Files/onnxruntime-objc/onnxruntime-objc-prefix.pch";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Target Support Files/onnxruntime-objc/onnxruntime-objc-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/onnxruntime-objc/onnxruntime-objc.modulemap";
+				PRODUCT_MODULE_NAME = onnxruntime_objc;
+				PRODUCT_NAME = onnxruntime_objc;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_INSTALL_OBJC_HEADER = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		760E334C4D24837C0B9D8E5CE8CFBC8B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5F48D77E10D5B30766F61E1DA3FAA0AC /* Pods-TryAngleApp.debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = "Target Support Files/Pods-TryAngleApp/Pods-TryAngleApp-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/Pods-TryAngleApp/Pods-TryAngleApp.modulemap";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		9B9AB1429831BAC0792EB374C06C900D /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = F1A396C1162A40791E0AD85CBB379F96 /* onnxruntime-objc.release.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREFIX_HEADER = "Target Support Files/onnxruntime-objc/onnxruntime-objc-prefix.pch";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Target Support Files/onnxruntime-objc/onnxruntime-objc-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/onnxruntime-objc/onnxruntime-objc.modulemap";
+				PRODUCT_MODULE_NAME = onnxruntime_objc;
+				PRODUCT_NAME = onnxruntime_objc;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_INSTALL_OBJC_HEADER = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		EFF83147EEBE05806FE6F947816063E5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 50A7E034354E91E58A3BC823F5568F5C /* onnxruntime-c.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F1183B489B6493F46C80CB6C1DE769F9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A3B11159CCA18F05EFC05755CF34DA48 /* onnxruntime-c.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		F3E264B2417BDFCD2BC2B58566242312 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"POD_CONFIGURATION_RELEASE=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRIP_INSTALLED_PRODUCT = NO;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				SYMROOT = "${SRCROOT}/../build";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1FAA34C873E6D52B09F47086906FF3E4 /* Build configuration list for PBXAggregateTarget "onnxruntime-c" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EFF83147EEBE05806FE6F947816063E5 /* Debug */,
+				F1183B489B6493F46C80CB6C1DE769F9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4821239608C13582E20E6DA73FD5F1F9 /* Build configuration list for PBXProject "Pods" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				296F86E0DD688C440F8EB2FD9C0415AF /* Debug */,
+				F3E264B2417BDFCD2BC2B58566242312 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		639C65AE92756E2E984BEBD55988678B /* Build configuration list for PBXNativeTarget "onnxruntime-objc" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				589D90111CF1F8BCC706D61ADC4B04AC /* Debug */,
+				9B9AB1429831BAC0792EB374C06C900D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D49579B94B13F71C7D4645B36B1A6DFA /* Build configuration list for PBXNativeTarget "Pods-TryAngleApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				760E334C4D24837C0B9D8E5CE8CFBC8B /* Debug */,
+				2FB25BDB6662EBAE530ADBEE947081AB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = BFDFE7DC352907FC980B868725387E98 /* Project object */;
+}

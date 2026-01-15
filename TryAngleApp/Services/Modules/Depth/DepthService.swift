@@ -1,0 +1,49 @@
+import Foundation
+import UIKit
+import CoreVideo
+
+// MARK: - Depth Service
+
+public class DepthService: DepthEstimator {
+    public let name = "DepthAnything"
+    public var isEnabled: Bool = true
+    
+    // Existing Singleton usage
+    private let core: DepthAnythingCoreML
+    
+    public init() {
+        self.core = DepthAnythingCoreML.shared
+    }
+    
+    public func initialize() async throws {
+        // DepthAnythingCoreML initializes model on init or first use mostly.
+        // We can force a check or just assume it's ready.
+        // The existing class has a `setupModel()` called in init.
+        print("✅ DepthService initialized (Wrapper around DepthAnythingCoreML)")
+    }
+    
+    public func estimate(input: FrameInput) async throws -> DepthEstimationResult? {
+        guard isEnabled else { return nil }
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            core.estimateDepth(from: input.image) { result in
+                switch result {
+                case .success(let v15Result):
+                    // Convert V15DepthResult to DepthEstimationResult
+                    // V15DepthResult usually generates stats, we might not get raw map unless modified.
+                    // The current `estimateDepth` returns V15DepthResult which has `compressionIndex` but nil depthImage/map by default for optimization.
+                    
+                    let depthResult = DepthEstimationResult(
+                        timestamp: input.timestamp,
+                        depthMap: nil, // Current implementation optimizes this out
+                        compressionIndex: v15Result.compressionIndex
+                    )
+                    continuation.resume(returning: depthResult)
+                    
+                case .failure(let error):
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+}
