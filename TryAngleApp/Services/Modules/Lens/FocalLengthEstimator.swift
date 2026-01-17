@@ -15,7 +15,7 @@ import UIKit
 import ImageIO
 
 // MARK: - 초점거리 정보
-struct FocalLengthInfo {
+public struct FocalLengthInfo {
     let focalLength35mm: Int      // 35mm 환산 초점거리 (mm)
     let source: FocalLengthSource // 정보 출처
     let confidence: Float         // 신뢰도 (0.0 ~ 1.0)
@@ -30,7 +30,7 @@ struct FocalLengthInfo {
 }
 
 // MARK: - 초점거리 정보 출처
-enum FocalLengthSource {
+public enum FocalLengthSource {
     case exif           // EXIF 메타데이터에서 추출
     case zoomFactor     // 줌 배율에서 계산
     case depthEstimate  // 뎁스맵으로 역추정
@@ -49,7 +49,7 @@ enum FocalLengthSource {
 }
 
 // MARK: - 렌즈 타입 (35mm 환산 기준)
-enum LensType: String {
+public enum LensType: String {
     case ultraWide  // 초광각: ~20mm
     case wide       // 광각: 21-35mm
     case normal     // 표준: 36-60mm

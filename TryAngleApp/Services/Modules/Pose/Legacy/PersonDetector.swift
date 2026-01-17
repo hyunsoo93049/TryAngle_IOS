@@ -12,6 +12,9 @@ class PersonDetector {
     // RTMPoseRunner 참조 (YOLOX 재사용)
     private weak var rtmPoseRunner: RTMPoseRunner?
 
+    // 🔥 CIContext 재사용 (메모리 최적화)
+    private static let sharedContext = CIContext(options: [.cacheIntermediates: false])
+
     // MARK: - Initialization
     init(rtmPoseRunner: RTMPoseRunner? = nil) {
         self.rtmPoseRunner = rtmPoseRunner
@@ -38,9 +41,8 @@ class PersonDetector {
     // MARK: - YOLOX Detection (RTMPoseRunner 재사용)
     private func detectPersonWithYOLOX(in image: CIImage, using runner: RTMPoseRunner, completion: @escaping (CGRect?) -> Void) {
         DispatchQueue.global(qos: .userInitiated).async {
-            // CIImage → UIImage 변환
-            let context = CIContext()
-            guard let cgImage = context.createCGImage(image, from: image.extent) else {
+            // CIImage → UIImage 변환 (sharedContext 사용)
+            guard let cgImage = Self.sharedContext.createCGImage(image, from: image.extent) else {
                 DispatchQueue.main.async { completion(nil) }
                 return
             }
@@ -82,8 +84,7 @@ class PersonDetector {
 
     private func detectAllPersonsWithYOLOX(in image: CIImage, using runner: RTMPoseRunner, completion: @escaping ([Detection]) -> Void) {
         DispatchQueue.global(qos: .userInitiated).async {
-            let context = CIContext()
-            guard let cgImage = context.createCGImage(image, from: image.extent) else {
+            guard let cgImage = Self.sharedContext.createCGImage(image, from: image.extent) else {
                 DispatchQueue.main.async { completion([]) }
                 return
             }

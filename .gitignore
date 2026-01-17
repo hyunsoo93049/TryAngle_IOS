@@ -49,3 +49,11 @@ fastlane/test_output
 # Code Injection
 #
 iOSInjectionProject/
+
+# macOS
+.DS_Store
+*.DS_Store
+
+# Large model files (backup in cloud)
+yolo11n.pt
+*.onnx

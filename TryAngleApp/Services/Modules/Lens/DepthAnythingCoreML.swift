@@ -37,9 +37,11 @@ class DepthAnythingCoreML {
         }
     }
 
-    init(modelType: ModelType = .small) {
+    init(modelType: ModelType = .small, skipModelLoad: Bool = false) {
         self.modelType = modelType
-        setupModel()
+        if !skipModelLoad {
+            setupModel()
+        }
     }
 
     // MARK: - 모델 설정
@@ -54,9 +56,16 @@ class DepthAnythingCoreML {
         }
 
         do {
-            let mlModel = try MLModel(contentsOf: modelURL)
+            logMemory("Depth Anything 로드 전")
+
+            // 🔥 Neural Engine + GPU 가속 설정
+            let config = MLModelConfiguration()
+            config.computeUnits = .all  // Neural Engine + GPU + CPU 자동 선택
+
+            let mlModel = try MLModel(contentsOf: modelURL, configuration: config)
             model = try VNCoreMLModel(for: mlModel)
-            print("✅ Depth Anything CoreML 모델 로드 성공")
+            print("✅ Depth Anything CoreML 모델 로드 성공 (Neural Engine 가속)")
+            logMemory("Depth Anything 로드 후")
         } catch {
             print("❌ Depth Anything 모델 로드 실패: \(error)")
         }
@@ -390,9 +399,40 @@ enum DepthError: LocalizedError {
     }
 }
 
-// MARK: - 싱글톤 (메모리 절약)
+// MARK: - 싱글톤 (지연 초기화 - 백그라운드)
 extension DepthAnythingCoreML {
-    static let shared = DepthAnythingCoreML(modelType: .small)
+    private static var _shared: DepthAnythingCoreML?
+    private static let initQueue = DispatchQueue(label: "depth.init", qos: .userInitiated)
+    private static var isInitializing = false
+
+    static var shared: DepthAnythingCoreML {
+        if let instance = _shared { return instance }
+
+        // 🔥 아직 초기화 안됨 → 빈 인스턴스 반환 (모델 없음)
+        initializeInBackground()
+        return _shared ?? DepthAnythingCoreML(modelType: .small, skipModelLoad: true)
+    }
+
+    /// 🔥 백그라운드에서 모델 초기화 (앱 시작 시 호출)
+    static func initializeInBackground(completion: (() -> Void)? = nil) {
+        guard _shared == nil && !isInitializing else {
+            completion?()
+            return
+        }
+
+        isInitializing = true
+
+        initQueue.async {
+            print("🚀 DepthAnythingCoreML 백그라운드 초기화 시작")
+            _shared = DepthAnythingCoreML(modelType: .small)
+            isInitializing = false
+            print("✅ DepthAnythingCoreML 백그라운드 초기화 완료")
+
+            DispatchQueue.main.async {
+                completion?()
+            }
+        }
+    }
 }
 
 // MARK: - UIImage 리사이즈 Extension (메모리 효율적)

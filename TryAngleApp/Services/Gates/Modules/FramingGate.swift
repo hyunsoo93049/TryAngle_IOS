@@ -20,8 +20,8 @@ public class FramingGate: GateModule {
         // 1. 필요한 데이터 추출
         let analysis = context.analysis
         let bbox = analysis.poseResult?.roughBBox ?? .zero // YOLOX Result usually gives roughBBox or use Pose BBox
-        let imageSize = analysis.input.image.size
-        let currentKeypoints = analysis.poseResult?.keypoints
+        let imageSize = analysis.input.imageSize
+        let currentKeypoints = analysis.poseResult?.asPoseKeypoints
         let reference = context.reference
         
         // 🆕 v9.3: 인물 감지 실패 체크 (Empty Air Problem)
@@ -159,7 +159,8 @@ public class FramingGate: GateModule {
             feedback: feedback,
             icon: "📸",
             category: "framing",
-            debugInfo: "현재: \(detectedShotType.displayName) vs 목표: \(refShotType.displayName)"
+            debugInfo: "현재: \(detectedShotType.displayName) vs 목표: \(refShotType.displayName)",
+            metadata: ["shotType": detectedShotType]
         )
     }
 }

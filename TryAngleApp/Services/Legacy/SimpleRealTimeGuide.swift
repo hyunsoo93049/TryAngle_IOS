@@ -15,7 +15,7 @@ import Foundation
 import CoreGraphics
 
 // MARK: - 가이드 타입
-enum GuideType: String, CaseIterable {
+enum LegacyGuideType: String, CaseIterable {
     case enterFrame = "프레임 진입"       // 인물이 화면에 없음
     case moveForward = "앞으로"           // 인물이 작음
     case moveBackward = "뒤로"            // 인물이 큼
@@ -46,7 +46,10 @@ enum GuideType: String, CaseIterable {
 }
 
 // MARK: - 피드백 단계 (UI 표시용)
-enum FeedbackStage: String {
+
+
+// MARK: - Legacy Types
+enum LegacyFeedbackStage: String {
     case frameEntry = "프레임 진입"
     case shotType = "샷타입"         // 크기/거리 조정
     case position = "위치"           // 좌우/상하 위치 조정
@@ -82,15 +85,15 @@ enum FeedbackStage: String {
 }
 
 // MARK: - 가이드 결과
-struct SimpleGuideResult: Equatable {
-    let guide: GuideType
+struct LegacySimpleGuideResult: Equatable {
+    let guide: LegacyGuideType
     let magnitude: String           // "반 걸음", "한 걸음", "조금" 등
     let progress: CGFloat           // 0.0 ~ 1.0 (전체 진행률)
     let debugInfo: String           // 디버그용 정보
     let shotTypeMatch: Bool         // 샷타입 일치 여부
     let currentShotType: String     // 현재 샷타입 이름
     let targetShotType: String      // 목표 샷타입 이름
-    let feedbackStage: FeedbackStage // 피드백 단계 (UI 표시용)
+    let feedbackStage: LegacyFeedbackStage // 피드백 단계 (UI 표시용)
 
     // 🆕 v6 스타일 상세 정보
     let tiltAngle: Int?             // 틸트 각도 (2°, 5°, 8°, 10°, 15°)
@@ -100,14 +103,14 @@ struct SimpleGuideResult: Equatable {
 
     // Equatable 준수를 위한 기본값 초기화
     init(
-        guide: GuideType,
+        guide: LegacyGuideType,
         magnitude: String,
         progress: CGFloat,
         debugInfo: String,
         shotTypeMatch: Bool,
         currentShotType: String,
         targetShotType: String,
-        feedbackStage: FeedbackStage,
+        feedbackStage: LegacyFeedbackStage,
         tiltAngle: Int? = nil,
         positionPercent: Int? = nil,
         currentZoom: CGFloat? = nil,
@@ -211,7 +214,7 @@ class SimpleRealTimeGuide {
     private var enablePoseCheck: Bool = true           // 🆕 포즈 체크 활성화 여부
 
     // MARK: - 안정화 (히스테리시스)
-    private var lastGuide: GuideType = .enterFrame
+    private var lastGuide: LegacyGuideType = .enterFrame
     private var lastGuideTime: Date = .distantPast
     private var sameGuideCount: Int = 0
     private let stabilityThreshold: Int = 2            // 2번 연속 같아야 변경
@@ -294,7 +297,7 @@ class SimpleRealTimeGuide {
         hasPersonDetected: Bool,
         isFrontCamera: Bool = false,
         currentZoom: CGFloat? = nil
-    ) -> SimpleGuideResult {
+    ) -> LegacySimpleGuideResult {
 
         // 레퍼런스 없으면 기본 가이드
         guard refPersonHeight > 0 else {
@@ -469,7 +472,7 @@ class SimpleRealTimeGuide {
         // 좌우 조정이 필요한 경우
         if abs(diffX) > positionToleranceX {
             let magnitude = getMagnitudePosition(diff: abs(diffX))
-            let guide: GuideType = diffX > 0 ? .moveLeft : .moveRight
+            let guide: LegacyGuideType = diffX > 0 ? .moveLeft : .moveRight
             let percent = min(50, Int(abs(diffX) * 100))  // 🆕 퍼센트 계산
 
             return stabilizeGuide(
@@ -489,7 +492,7 @@ class SimpleRealTimeGuide {
 
         // 상하 조정이 필요한 경우 (틸트 각도 포함)
         if abs(diffY) > positionToleranceY {
-            let guide: GuideType = diffY > 0 ? .tiltUp : .tiltDown
+            let guide: LegacyGuideType = diffY > 0 ? .tiltUp : .tiltDown
             let tiltAngle = toTiltAngle(percent: abs(diffY) * 100)  // 🆕 틸트 각도 계산
 
             return stabilizeGuide(
@@ -634,20 +637,20 @@ class SimpleRealTimeGuide {
 
     /// 결과 생성 (v6 스타일 상세 정보 포함)
     private func createResult(
-        guide: GuideType,
+        guide: LegacyGuideType,
         magnitude: String,
         progress: CGFloat,
         debugInfo: String,
         shotTypeMatch: Bool,
         currentShotType: String,
         targetShotType: String,
-        feedbackStage: FeedbackStage,
+        feedbackStage: LegacyFeedbackStage,
         tiltAngle: Int? = nil,
         positionPercent: Int? = nil,
         currentZoom: CGFloat? = nil,
         targetZoom: CGFloat? = nil
-    ) -> SimpleGuideResult {
-        return SimpleGuideResult(
+    ) -> LegacySimpleGuideResult {
+        return LegacySimpleGuideResult(
             guide: guide,
             magnitude: magnitude,
             progress: progress,
@@ -766,7 +769,7 @@ class SimpleRealTimeGuide {
     }
 
     /// 가이드 안정화 (히스테리시스)
-    private func stabilizeGuide(_ newResult: SimpleGuideResult) -> SimpleGuideResult {
+    private func stabilizeGuide(_ newResult: LegacySimpleGuideResult) -> LegacySimpleGuideResult {
         let now = Date()
 
         // 동일 가이드 카운트

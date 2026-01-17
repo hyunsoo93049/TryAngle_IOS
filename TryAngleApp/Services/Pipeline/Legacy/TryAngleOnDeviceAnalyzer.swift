@@ -33,12 +33,12 @@ class TryAngleOnDeviceAnalyzer {
 
         self.useLegacySystem = enableLegacySystem
 
-        // RTMPose (ONNX)
-        if let rtmpose = RTMPoseRunner() {
+        // RTMPose (ONNX) - 싱글톤 사용
+        if let rtmpose = RTMPoseRunner.shared {
             self.rtmposeRunner = rtmpose
-            print("✅ RTMPose ONNX 로드 완료")
+            print("✅ RTMPose ONNX 싱글톤 연결 완료")
         } else {
-            fatalError("❌ RTMPose 초기화 실패")
+            fatalError("❌ RTMPose 초기화 실패 (shared singleton nil)")
         }
 
         // Depth Anything (CoreML) - 🔥 싱글톤 사용 (메모리 최적화)

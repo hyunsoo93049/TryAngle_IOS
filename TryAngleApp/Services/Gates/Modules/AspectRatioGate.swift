@@ -23,7 +23,7 @@ public class AspectRatioGate: GateModule {
         }
         
         // 2. 현재 비율 계산
-        let currentSize = context.analysis.input.image.size
+        let currentSize = context.analysis.input.imageSize
         let currentRatio = CameraAspectRatio.detect(from: currentSize)
         let refRatio = reference.aspectRatio
         
