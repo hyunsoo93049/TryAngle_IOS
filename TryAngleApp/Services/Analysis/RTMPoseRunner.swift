@@ -3,6 +3,8 @@ import UIKit
 import CoreGraphics
 import Accelerate
 import simd
+import Vision
+import CoreML
 
 // MARK: - RTMPose 결과 구조체
 struct RTMPoseResult {
@@ -10,46 +12,85 @@ struct RTMPoseResult {
     let boundingBox: CGRect?  // 인물 검출 박스
 }
 
-// MARK: - RTMPose Runner (ONNX Runtime Objective-C API)
+// MARK: - RTMPose Runner (CoreML + ONNX Runtime)
+// 역할: YOLO11n(사람 검출, CoreML) + RTMPose(133개 키포인트, ONNX) 모델을 실행하는 핵심 러너입니다.
+//       싱글톤으로 구현되어 앱 전체에서 하나의 인스턴스만 사용합니다.
 class RTMPoseRunner {
 
-    private var detectorSession: ORTSession?
+    // MARK: - Singleton (지연 초기화)
+    private static var _shared: RTMPoseRunner?
+    private static let initQueue = DispatchQueue(label: "rtmpose.init", qos: .userInitiated)
+    private static var isInitializing = false
+
+    static var shared: RTMPoseRunner? {
+        if let instance = _shared { return instance }
+
+        // 🔥 백그라운드에서 아직 초기화 안됨 → nil 반환 (나중에 다시 시도)
+        initializeInBackground()
+        return _shared
+    }
+
+    /// 🔥 백그라운드에서 모델 초기화 (앱 시작 시 호출)
+    static func initializeInBackground(completion: (() -> Void)? = nil) {
+        guard _shared == nil && !isInitializing else {
+            completion?()
+            return
+        }
+
+        isInitializing = true
+
+        initQueue.async {
+            print("🚀 RTMPoseRunner 백그라운드 초기화 시작")
+            _shared = RTMPoseRunner()
+            isInitializing = false
+            print("✅ RTMPoseRunner 백그라운드 초기화 완료")
+
+            DispatchQueue.main.async {
+                completion?()
+            }
+        }
+    }
+
+    // YOLO11n CoreML (사람 검출)
+    private var yoloModel: VNCoreMLModel?
+
+    // RTMPose ONNX (포즈 추정)
     private var poseSession: ORTSession?
     private var env: ORTEnv?
 
     // 모델 경로
-    private let detectorModelPath: String
     private let poseModelPath: String
 
     // 모델 입력 크기
     private let detectorInputSize = CGSize(width: 640, height: 640)
     private let poseInputSize = CGSize(width: 192, height: 256)
 
-    init?() {
-        print("🚀 RTMPoseRunner init() 시작")
+    private init?() {
+        // 🔥 이 init은 백그라운드 스레드에서만 호출됨
+        print("🚀 RTMPoseRunner init() 시작 (백그라운드)")
 
-        // ONNX format 모델 사용 (전체 ONNX Runtime 사용)
-        guard let detectorURL = Bundle.main.url(forResource: "yolox_int8", withExtension: "onnx") else {
-            print("❌ yolox_int8.onnx 파일을 찾을 수 없습니다")
-            print("   Bundle path: \(Bundle.main.bundlePath)")
-            print("   Bundle resources: \(Bundle.main.paths(forResourcesOfType: "onnx", inDirectory: nil))")
+        // YOLO11n CoreML 모델 (사람 검출) - 메모리 효율적
+        guard let yoloURL = Bundle.main.url(forResource: "YOLO11nDetector", withExtension: "mlmodelc") else {
+            print("❌ YOLO11nDetector.mlmodelc 파일을 찾을 수 없습니다")
             return nil
         }
 
+        // RTMPose ONNX 모델 (포즈 추정)
         guard let poseURL = Bundle.main.url(forResource: "rtmpose_int8", withExtension: "onnx") else {
             print("❌ rtmpose_int8.onnx 파일을 찾을 수 없습니다")
-            print("   Bundle path: \(Bundle.main.bundlePath)")
-            print("   Bundle resources: \(Bundle.main.paths(forResourcesOfType: "onnx", inDirectory: nil))")
             return nil
         }
 
-        detectorModelPath = detectorURL.path
         poseModelPath = poseURL.path
 
-        print("✅ ONNX 모델 경로 확인 (전체 Runtime 사용):")
-        print("   Detector (YOLOX): \(detectorModelPath)")
-        print("   Pose (RTMPose): \(poseModelPath)")
+        print("✅ 모델 경로 확인:")
+        print("   Detector (YOLO11n CoreML): \(yoloURL.path)")
+        print("   Pose (RTMPose ONNX): \(poseModelPath)")
 
+        // CoreML 모델 로드 (백그라운드)
+        setupCoreMLDetector(yoloURL: yoloURL)
+
+        // ONNX Runtime 초기화 (백그라운드)
         setupONNXRuntime()
     }
 
@@ -57,30 +98,36 @@ class RTMPoseRunner {
         print("🗑️ RTMPoseRunner deinit")
     }
 
-    // MARK: - ONNX Runtime 초기화
+    // MARK: - CoreML Detector 초기화 (YOLO11n)
+    private func setupCoreMLDetector(yoloURL: URL) {
+        print("🔧 YOLO11n CoreML 초기화 시작...")
+        logMemory("YOLO11n 로드 전")
+
+        do {
+            // CoreML 모델 로드 (컴파일)
+            let config = MLModelConfiguration()
+            config.computeUnits = .all  // Neural Engine + GPU + CPU 자동 선택
+
+            let mlModel = try MLModel(contentsOf: yoloURL, configuration: config)
+            yoloModel = try VNCoreMLModel(for: mlModel)
+            print("✅ YOLO11n CoreML 로드 성공 (Neural Engine 가속)")
+            logMemory("YOLO11n 로드 후")
+        } catch {
+            print("❌ YOLO11n CoreML 로드 실패: \(error)")
+            yoloModel = nil
+        }
+    }
+
+    // MARK: - ONNX Runtime 초기화 (RTMPose만)
     private func setupONNXRuntime() {
-        print("🔧 ONNX Runtime 초기화 시작...")
+        print("🔧 ONNX Runtime 초기화 시작 (RTMPose)...")
 
         do {
             // 1. Environment 생성
             env = try ORTEnv(loggingLevel: ORTLoggingLevel.warning)
             print("✅ Environment 생성 성공")
 
-            // 2. YOLOX용 Session Options (CoreML GPU 가속)
-            let detectorOptions = try ORTSessionOptions()
-
-            // 🔥 YOLOX도 CoreML GPU 가속 활성화
-            do {
-                try detectorOptions.appendCoreMLExecutionProvider()
-                print("✅ YOLOX: CoreML GPU 가속 활성화")
-            } catch {
-                print("⚠️ YOLOX CoreML 활성화 실패, CPU 폴백: \(error)")
-            }
-
-            try detectorOptions.setIntraOpNumThreads(6)  // 병렬 처리
-            try detectorOptions.setGraphOptimizationLevel(.all)
-
-            // 3. RTMPose용 Session Options (CoreML GPU 가속)
+            // 2. RTMPose용 Session Options (CoreML GPU 가속)
             let poseOptions = try ORTSessionOptions()
 
             // 🔥 CoreML Execution Provider 활성화 (GPU 가속)
@@ -92,74 +139,68 @@ class RTMPoseRunner {
             }
 
             // 병렬 처리 설정 (최대 성능)
-            try poseOptions.setIntraOpNumThreads(6)  // 🔥 스레드 6개로 증가
+            try poseOptions.setIntraOpNumThreads(6)
             try poseOptions.setGraphOptimizationLevel(.all)
 
-            print("✅ 최대 성능 최적화 설정 완료 (YOLOX: CoreML GPU, RTMPose: CoreML GPU)")
-
-            // 4. 세션 생성
-            print("📦 Detector 모델 로딩 중... (\(detectorModelPath))")
-            detectorSession = try ORTSession(env: env!, modelPath: detectorModelPath, sessionOptions: detectorOptions)
-            print("✅ YOLOX Detector 로드 성공 (CoreML GPU)")
+            // 3. RTMPose 세션 생성
+            logMemory("RTMPose 로드 전")
 
             print("📦 Pose 모델 로딩 중... (\(poseModelPath))")
             poseSession = try ORTSession(env: env!, modelPath: poseModelPath, sessionOptions: poseOptions)
             print("✅ RTMPose 로드 성공 (CoreML GPU)")
+            logMemory("RTMPose 로드 후")
 
             print("🔧 ONNX Runtime 초기화 완료")
 
         } catch {
             print("❌ ONNX Runtime 초기화 실패: \(error)")
             env = nil
-            detectorSession = nil
             poseSession = nil
         }
     }
 
-    // MARK: - YOLOX만 사용한 사람 검출 (BBox만 필요할 때)
+    // MARK: - YOLO11n CoreML로 사람 검출 (BBox만 필요할 때)
     func detectPersonBBox(from image: UIImage) -> CGRect? {
-        guard let detectorSession = detectorSession,
-              let env = env else {
-            print("❌ YOLOX 세션이 초기화되지 않음")
+        guard let yoloModel = yoloModel else {
+            print("❌ YOLO11n CoreML 모델이 초기화되지 않음")
             return nil
         }
 
-        return detectPerson(from: image, using: detectorSession, env: env)
+        return detectPersonWithCoreML(from: image, model: yoloModel)
     }
 
-    // MARK: - YOLOX로 모든 사람 검출 (멀티 person)
+    // MARK: - YOLO11n CoreML로 모든 사람 검출 (멀티 person)
     func detectAllPersonBBoxes(from image: UIImage) -> [CGRect] {
-        guard let detectorSession = detectorSession,
-              let env = env else {
-            print("❌ YOLOX 세션이 초기화되지 않음")
+        guard let yoloModel = yoloModel else {
+            print("❌ YOLO11n CoreML 모델이 초기화되지 않음")
             return []
         }
 
-        return detectAllPersons(from: image, using: detectorSession, env: env)
+        return detectAllPersonsWithCoreML(from: image, model: yoloModel)
     }
 
     // MARK: - 세션 상태 확인
     var isReady: Bool {
-        return detectorSession != nil && poseSession != nil && env != nil
+        return yoloModel != nil && poseSession != nil && env != nil
     }
 
     // MARK: - 포즈 추정
     func detectPose(from image: UIImage) -> RTMPoseResult? {
-        guard let detectorSession = detectorSession,
+        guard let yoloModel = yoloModel,
               let poseSession = poseSession,
               let env = env else {
             print("❌ RTMPose 세션이 초기화되지 않음")
             return nil
         }
 
-        // 1. YOLOX로 사람 검출
+        // 1. YOLO11n CoreML로 사람 검출
         let boundingBox: CGRect
-        if let detectedBox = detectPerson(from: image, using: detectorSession, env: env) {
-            print("✅ YOLOX: 사람 검출 성공 - \(detectedBox)")
+        if let detectedBox = detectPersonWithCoreML(from: image, model: yoloModel) {
+            print("✅ YOLO11n: 사람 검출 성공 - \(detectedBox)")
             boundingBox = detectedBox
         } else {
-            // YOLOX가 사람을 검출하지 못하면 전체 이미지 사용
-            print("⚠️ YOLOX: 사람을 검출하지 못함 → 전체 이미지로 포즈 추정 시도")
+            // YOLO11n이 사람을 검출하지 못하면 전체 이미지 사용
+            print("⚠️ YOLO11n: 사람을 검출하지 못함 → 전체 이미지로 포즈 추정 시도")
             guard let cgImage = image.cgImage else { return nil }
             boundingBox = CGRect(x: 0, y: 0, width: cgImage.width, height: cgImage.height)
         }
@@ -176,46 +217,134 @@ class RTMPoseRunner {
         return keypoints.map { RTMPoseResult(keypoints: $0, boundingBox: boundingBox) }
     }
 
-    // MARK: - YOLOX 사람 검출
-    private func detectPerson(from image: UIImage, using session: ORTSession, env: ORTEnv) -> CGRect? {
+    // MARK: - YOLO11n CoreML 사람 검출 (단일)
+    private static let visionQueue = DispatchQueue(label: "yolo11n.vision", qos: .userInitiated)
+
+    private func detectPersonWithCoreML(from image: UIImage, model: VNCoreMLModel) -> CGRect? {
         guard let cgImage = image.cgImage else { return nil }
 
-        // 이미지를 640x640으로 리사이즈
-        let inputSize = detectorInputSize
-        guard let resizedImage = resizeImage(cgImage, targetSize: inputSize) else { return nil }
+        var resultBox: CGRect?
+        let semaphore = DispatchSemaphore(value: 0)
+        let imageWidth = cgImage.width
+        let imageHeight = cgImage.height
 
-        // 이미지를 Float 배열로 변환 (RGB, 정규화)
-        let pixelData = preprocessImage(resizedImage, size: inputSize)
+        // 백그라운드 스레드에서 Vision 요청 실행
+        Self.visionQueue.async {
+            // 🔥 메모리 누수 방지: Vision 요청 객체 즉시 해제
+            autoreleasepool {
+                let request = VNCoreMLRequest(model: model) { request, error in
+                    if let error = error {
+                        print("❌ YOLO11n 추론 오류: \(error)")
+                        semaphore.signal()
+                        return
+                    }
 
-        do {
-            // 입력 텐서 생성 - [1, 3, 640, 640]
-            let inputShape: [NSNumber] = [1, 3, NSNumber(value: Int(inputSize.height)), NSNumber(value: Int(inputSize.width))]
-            let inputTensor = try ORTValue(
-                tensorData: NSMutableData(data: pixelData),
-                elementType: .float,
-                shape: inputShape
-            )
+                    // VNRecognizedObjectObservation으로 결과 파싱
+                    guard let results = request.results as? [VNRecognizedObjectObservation] else {
+                        print("⚠️ YOLO11n: 결과 형식 불일치")
+                        semaphore.signal()
+                        return
+                    }
 
-            // 추론 실행
-            let outputs = try session.run(
-                withInputs: ["input": inputTensor],
-                outputNames: ["dets", "labels"],
-                runOptions: nil
-            )
+                    // person 클래스만 필터링하고 가장 높은 confidence 선택
+                    var bestBox: CGRect?
+                    var bestConfidence: Float = 0.3  // 최소 임계값
 
-            guard let detsTensor = outputs["dets"],
-                  let labelsTensor = outputs["labels"] else {
-                print("❌ YOLOX 출력을 찾을 수 없음")
-                return nil
+                    for observation in results {
+                        // person 클래스 확인 (COCO 클래스 0)
+                        if let topLabel = observation.labels.first,
+                           topLabel.identifier == "person" || topLabel.identifier == "0",
+                           topLabel.confidence > bestConfidence {
+                            bestConfidence = topLabel.confidence
+                            // Vision 좌표계 (좌하단 원점) → UIKit 좌표계 변환
+                            let bbox = observation.boundingBox
+                            bestBox = CGRect(
+                                x: bbox.minX * CGFloat(imageWidth),
+                                y: (1 - bbox.maxY) * CGFloat(imageHeight),
+                                width: bbox.width * CGFloat(imageWidth),
+                                height: bbox.height * CGFloat(imageHeight)
+                            )
+                        }
+                    }
+
+                    resultBox = bestBox
+                    semaphore.signal()
+                }
+
+                request.imageCropAndScaleOption = .scaleFill
+
+                let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+                do {
+                    try handler.perform([request])
+                } catch {
+                    print("❌ YOLO11n Vision 실행 오류: \(error)")
+                    semaphore.signal()
+                }
             }
-
-            // 출력 파싱하여 바운딩 박스 추출
-            return parseYOLOXOutput(detsTensor, labels: labelsTensor, imageSize: CGSize(width: cgImage.width, height: cgImage.height))
-
-        } catch {
-            print("❌ YOLOX 추론 오류: \(error)")
-            return nil
         }
+
+        semaphore.wait()
+        return resultBox
+    }
+
+    // MARK: - YOLO11n CoreML 모든 사람 검출 (멀티)
+    private func detectAllPersonsWithCoreML(from image: UIImage, model: VNCoreMLModel) -> [CGRect] {
+        guard let cgImage = image.cgImage else { return [] }
+
+        var resultBoxes: [CGRect] = []
+        let semaphore = DispatchSemaphore(value: 0)
+        let imageWidth = cgImage.width
+        let imageHeight = cgImage.height
+
+        // 백그라운드 스레드에서 Vision 요청 실행
+        Self.visionQueue.async {
+            // 🔥 메모리 누수 방지: Vision 요청 객체 즉시 해제
+            autoreleasepool {
+                let request = VNCoreMLRequest(model: model) { request, error in
+                    if let error = error {
+                        print("❌ YOLO11n 추론 오류: \(error)")
+                        semaphore.signal()
+                        return
+                    }
+
+                    guard let results = request.results as? [VNRecognizedObjectObservation] else {
+                        semaphore.signal()
+                        return
+                    }
+
+                    let threshold: Float = 0.3
+
+                    for observation in results {
+                        if let topLabel = observation.labels.first,
+                           topLabel.identifier == "person" || topLabel.identifier == "0",
+                           topLabel.confidence > threshold {
+                            let bbox = observation.boundingBox
+                            let box = CGRect(
+                                x: bbox.minX * CGFloat(imageWidth),
+                                y: (1 - bbox.maxY) * CGFloat(imageHeight),
+                                width: bbox.width * CGFloat(imageWidth),
+                                height: bbox.height * CGFloat(imageHeight)
+                            )
+                            resultBoxes.append(box)
+                        }
+                    }
+                    semaphore.signal()
+                }
+
+                request.imageCropAndScaleOption = .scaleFill
+
+                let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+                do {
+                    try handler.perform([request])
+                } catch {
+                    print("❌ YOLO11n Vision 실행 오류: \(error)")
+                    semaphore.signal()
+                }
+            }
+        }
+
+        semaphore.wait()
+        return resultBoxes
     }
 
     // MARK: - RTMPose 포즈 추정
@@ -356,131 +485,7 @@ class RTMPoseRunner {
         return Data(bytes: &floatData, count: floatData.count * MemoryLayout<Float>.size)
     }
 
-    // MARK: - 출력 파싱
-    private func parseYOLOXOutput(_ dets: ORTValue, labels: ORTValue, imageSize: CGSize) -> CGRect? {
-        // YOLOX 출력 형식:
-        // dets: [1, num_boxes, 5] - (x1, y1, x2, y2, score)
-        // labels: [1, num_boxes] - class_id
-
-        guard let detsData = try? dets.tensorData() as NSData,
-              let labelsData = try? labels.tensorData() as NSData else { return nil }
-        guard let detsShape = try? dets.tensorTypeAndShapeInfo().shape else { return nil }
-
-        let numBoxes = detsShape[1].intValue
-        if numBoxes == 0 {
-            print("⚠️ YOLOX: 검출된 박스 없음")
-            return nil
-        }
-
-        var bestBox: CGRect?
-        var bestScore: Float = 0.3  // 최소 임계값
-
-        let detsPointer = detsData.bytes.bindMemory(to: Float.self, capacity: detsData.length / MemoryLayout<Float>.size)
-        let labelsPointer = labelsData.bytes.bindMemory(to: Int64.self, capacity: labelsData.length / MemoryLayout<Int64>.size)
-
-        // 640x640 좌표를 원본 이미지 좌표로 변환
-        let scaleX = imageSize.width / detectorInputSize.width
-        let scaleY = imageSize.height / detectorInputSize.height
-
-        for i in 0..<numBoxes {
-            let label = labelsPointer[i]
-            // person class = 0
-            guard label == 0 else { continue }
-
-            let offset = i * 5
-            let x1 = CGFloat(detsPointer[offset + 0]) * scaleX
-            let y1 = CGFloat(detsPointer[offset + 1]) * scaleY
-            let x2 = CGFloat(detsPointer[offset + 2]) * scaleX
-            let y2 = CGFloat(detsPointer[offset + 3]) * scaleY
-            let score = detsPointer[offset + 4]
-
-            if score > bestScore {
-                bestBox = CGRect(
-                    x: x1,
-                    y: y1,
-                    width: x2 - x1,
-                    height: y2 - y1
-                )
-                bestScore = score
-            }
-        }
-
-        return bestBox
-    }
-
-    // MARK: - YOLOX 모든 사람 검출 (멀티 person)
-    private func detectAllPersons(from image: UIImage, using session: ORTSession, env: ORTEnv) -> [CGRect] {
-        guard let cgImage = image.cgImage else { return [] }
-
-        let inputSize = detectorInputSize
-        guard let resizedImage = resizeImage(cgImage, targetSize: inputSize) else { return [] }
-
-        let pixelData = preprocessImage(resizedImage, size: inputSize)
-
-        do {
-            let inputShape: [NSNumber] = [1, 3, NSNumber(value: Int(inputSize.height)), NSNumber(value: Int(inputSize.width))]
-            let inputTensor = try ORTValue(
-                tensorData: NSMutableData(data: pixelData),
-                elementType: .float,
-                shape: inputShape
-            )
-
-            let outputs = try session.run(
-                withInputs: ["input": inputTensor],
-                outputNames: ["dets", "labels"],
-                runOptions: nil
-            )
-
-            guard let detsTensor = outputs["dets"],
-                  let labelsTensor = outputs["labels"] else {
-                return []
-            }
-
-            return parseYOLOXOutputAll(detsTensor, labels: labelsTensor, imageSize: CGSize(width: cgImage.width, height: cgImage.height))
-
-        } catch {
-            print("❌ YOLOX 추론 오류: \(error)")
-            return []
-        }
-    }
-
-    // MARK: - YOLOX 출력 파싱 (모든 person)
-    private func parseYOLOXOutputAll(_ dets: ORTValue, labels: ORTValue, imageSize: CGSize) -> [CGRect] {
-        guard let detsData = try? dets.tensorData() as NSData,
-              let labelsData = try? labels.tensorData() as NSData else { return [] }
-        guard let detsShape = try? dets.tensorTypeAndShapeInfo().shape else { return [] }
-
-        let numBoxes = detsShape[1].intValue
-        if numBoxes == 0 { return [] }
-
-        var boxes: [CGRect] = []
-        let threshold: Float = 0.3
-
-        let detsPointer = detsData.bytes.bindMemory(to: Float.self, capacity: detsData.length / MemoryLayout<Float>.size)
-        let labelsPointer = labelsData.bytes.bindMemory(to: Int64.self, capacity: labelsData.length / MemoryLayout<Int64>.size)
-
-        let scaleX = imageSize.width / detectorInputSize.width
-        let scaleY = imageSize.height / detectorInputSize.height
-
-        for i in 0..<numBoxes {
-            let label = labelsPointer[i]
-            guard label == 0 else { continue }  // person class = 0
-
-            let offset = i * 5
-            let score = detsPointer[offset + 4]
-            guard score > threshold else { continue }
-
-            let x1 = CGFloat(detsPointer[offset + 0]) * scaleX
-            let y1 = CGFloat(detsPointer[offset + 1]) * scaleY
-            let x2 = CGFloat(detsPointer[offset + 2]) * scaleX
-            let y2 = CGFloat(detsPointer[offset + 3]) * scaleY
-
-            boxes.append(CGRect(x: x1, y: y1, width: x2 - x1, height: y2 - y1))
-        }
-
-        return boxes
-    }
-
+    // MARK: - RTMPose SimCC 출력 파싱
     private func parseRTMPoseSimCCOutput(simccX: ORTValue, simccY: ORTValue, boundingBox: CGRect, imageSize: CGSize) -> [(point: CGPoint, confidence: Float)]? {
         // SimCC 출력 형식:
         // simcc_x: [1, num_keypoints, 384] - x 좌표 확률 분포

@@ -67,8 +67,8 @@ class RealtimeAnalyzer: ObservableObject {
     @Published var state = AnalysisState()
     
     // 🔥 Detection Pipeline Integration
-    private let pipeline = DetectionPipeline()
-    private var pipelineCancellables = Set<AnyCancellable>()
+    let pipeline = DetectionPipeline()
+    var pipelineCancellables = Set<AnyCancellable>()
     
     // 💡 Wrapper properties for backward compatibility (read-only)
     var instantFeedback: [FeedbackItem] { state.instantFeedback }
@@ -99,7 +99,7 @@ class RealtimeAnalyzer: ObservableObject {
     // 🔥 분석 전용 백그라운드 큐 (UI 블로킹 방지)
     private let analysisQueue = DispatchQueue(label: "com.tryangle.analysis", qos: .userInitiated)
     private var isAnalyzing = false  // 분석 중복 방지 플래그
-    private var isPaused = false     // 일시 중지 플래그 (탭 전환 시)
+    var isPaused = false     // 일시 중지 플래그 (탭 전환 시) - Extension에서 접근 필요
 
     // 히스테리시스를 위한 상태 추적
     private var feedbackHistory: [String: Int] = [:]  // 카테고리별 연속 감지 횟수
@@ -140,10 +140,13 @@ class RealtimeAnalyzer: ObservableObject {
         "pose_missing_parts"
     ]
 
-    // 🔥 RTMPose 분석기 (ONNX Runtime with CoreML EP)
-    private var poseMLAnalyzer: PoseMLAnalyzer!
-    private let compositionAnalyzer = CompositionAnalyzer()
+    // 🔥 RTMPose 분석기 (싱글톤 사용)
+    private var poseService: RTMPoseService { RTMPoseService.shared }
+    private let compositionAnalyzer = RuleCompositionAnalyzer()
     private let cameraAngleDetector = CameraAngleDetector()
+
+    // 🆕 모듈화된 레퍼런스 분석기
+    private let referenceAnalyzer = ReferenceAnalyzer.shared
     
     // 🆕 Image Processing Context
     private let ciContext = CIContext(options: [.cacheIntermediates: false])
@@ -208,29 +211,32 @@ class RealtimeAnalyzer: ObservableObject {
         // conversion logic:
         
         analysisQueue.async { [weak self] in
-            guard let self = self else { return }
-            
-            guard let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) else { return }
-            let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
-            let context = self.ciContext
-            guard let cgImage = context.createCGImage(ciImage, from: ciImage.extent) else { return }
-            
-            let image = UIImage(cgImage: cgImage, scale: 1.0, orientation: .up)
-            
-            var metadata: [String: Any] = [:]
-            if let b = brightness {
-                metadata["BrightnessValue"] = b
+            // 🔥 메모리 누수 방지: 매 프레임 임시 객체 즉시 해제
+            autoreleasepool {
+                guard let self = self else { return }
+
+                guard let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) else { return }
+                let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+                let context = self.ciContext
+                guard let cgImage = context.createCGImage(ciImage, from: ciImage.extent) else { return }
+
+                let image = UIImage(cgImage: cgImage, scale: 1.0, orientation: .up)
+
+                var metadata: [String: Any] = [:]
+                if let b = brightness {
+                    metadata["BrightnessValue"] = b
+                }
+
+                let input = FrameInput(
+                    image: image,
+                    timestamp: Date().timeIntervalSince1970,
+                    cameraPosition: isFrontCamera ? .front : .back,
+                    orientation: .up,
+                    metadata: metadata
+                )
+
+                self.pipeline.process(input: input)
             }
-            
-            let input = FrameInput(
-                image: image,
-                timestamp: Date().timeIntervalSince1970,
-                cameraPosition: isFrontCamera ? .front : .back,
-                orientation: .up,
-                metadata: metadata
-            )
-            
-            self.pipeline.process(input: input)
         }
     }
     
@@ -280,29 +286,17 @@ class RealtimeAnalyzer: ObservableObject {
 
     // 🆕 초기화
     init() {
-        // Setup Pipeline
+        // Setup Pipeline (실시간 분석용)
         self.setupPipeline()
-        
-        // ... (Keep existing bg init for Reference Analyzer if needed)
+
+        // 🆕 Setup Reference Analyzer (레퍼런스 분석용)
+        self.referenceAnalyzer.setupDefaultModules()
 
         // print("🎬🎬🎬 RealtimeAnalyzer init() 호출됨 🎬🎬🎬")
 
-        // 🔥 PoseMLAnalyzer를 백그라운드에서 미리 로드 (앱 시작 시 17초 지연 방지)
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            // print("🔥 RealtimeAnalyzer: PoseMLAnalyzer 백그라운드 초기화 시작")
-            let startTime = CACurrentMediaTime()
-            let analyzer = PoseMLAnalyzer()
-            let loadTime = (CACurrentMediaTime() - startTime) * 1000
-            // print("✅ RealtimeAnalyzer: PoseMLAnalyzer 초기화 완료 (\(String(format: "%.0f", loadTime))ms)")
-
-            DispatchQueue.main.async {
-                self?.poseMLAnalyzer = analyzer
-
-                // 🔥 PersonDetector에 RTMPoseRunner 연결 (YOLOX 재사용)
-                if let rtmRunner = analyzer.rtmPoseRunner {
-                    self?.personDetector.setRTMPoseRunner(rtmRunner)
-                }
-            }
+        // 🔥 PersonDetector에 RTMPoseRunner 싱글톤 연결 (YOLOX 재사용)
+        if let rtmRunner = RTMPoseRunner.shared {
+            self.personDetector.setRTMPoseRunner(rtmRunner)
         }
     }
 
@@ -398,184 +392,89 @@ class RealtimeAnalyzer: ObservableObject {
 
     // MARK: - 레퍼런스 이미지 분석
     func analyzeReference(_ image: UIImage, imageData: Data? = nil) {
-        print("🎯 레퍼런스 이미지 분석 시작...")
+        print("🎯 레퍼런스 이미지 분석 시작 (모듈화 시스템)...")
 
         // 🆕 EXIF 추출용 이미지 데이터 저장
         self.referenceImageData = imageData ?? image.jpegData(compressionQuality: 1.0)
 
-        guard let cgImage = image.cgImage else {
+        guard image.cgImage != nil else {
             print("❌ cgImage 없음")
             return
         }
 
-        // 🆕 모델 로딩 대기
-        guard let analyzer = poseMLAnalyzer else {
-            print("⏳ PoseMLAnalyzer 로딩 중... 레퍼런스 분석 대기")
-            // 0.5초 후 재시도
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                self?.analyzeReference(image)
-            }
-            return
+        // 🆕 모듈화된 레퍼런스 분석기 사용
+        Task {
+            // ReferenceAnalyzer로 분석 실행
+            let result = await referenceAnalyzer.analyze(image: image, imageData: imageData)
+
+            // 결과를 기존 시스템과 호환되는 형태로 변환
+            await processReferenceResult(result, image: image)
+        }
+    }
+
+    /// 🆕 ReferenceAnalyzer 결과를 기존 시스템 형태로 변환
+    @MainActor
+    private func processReferenceResult(_ result: ReferenceAnalysisResult, image: UIImage) {
+        let context = result.context
+        let imageSize = result.input.imageSize
+
+        // 1. 포즈 키포인트 변환
+        let poseKeypoints = context.poseKeypoints
+
+        // 2. Depth 결과 변환
+        let depth: V15DepthResult?
+        if let depthResult = context.depthResult {
+            depth = V15DepthResult(
+                depthImage: nil,
+                compressionIndex: depthResult.compressionIndex,
+                cameraType: .normal  // 기본값
+            )
+        } else {
+            depth = nil
         }
 
-        // print("🎯 레퍼런스 이미지 크기: \(cgImage.width) x \(cgImage.height)")
-        // print("🎯 레퍼런스 이미지 orientation: \(image.imageOrientation.rawValue)")
-
-        // 🔥 RTMPose로 얼굴+포즈 동시 분석 (ONNX Runtime with CoreML EP)
-        // print("🎯 PoseMLAnalyzer.analyzeFaceAndPose() 호출 중...")
-        let (faceResult, poseResult) = analyzer.analyzeFaceAndPose(from: image)
-        // print("🎯 분석 완료:")
-        // print("   - 얼굴: \(faceResult != nil ? "✅ 검출됨" : "❌ 검출 안됨")")
-        // print("   - 포즈: \(poseResult != nil ? "✅ 검출됨 (\(poseResult!.keypoints.count)개 키포인트)" : "❌ 검출 안됨")")
-
-        if let pose = poseResult {
-            let visibleCount = pose.keypoints.filter { $0.confidence >= 0.5 }.count
-            // print("   - 포즈 신뢰도 ≥ 0.5: \(visibleCount)/\(pose.keypoints.count)개")
-        }
-
-        // 🔥 디버그: 포즈 검출 실패 시 이미지 저장
-        if poseResult == nil {
-            saveDebugImage(image, reason: "pose_detection_failed")
-        }
-
-        let faceRect = faceResult?.faceRect
-        let faceYaw = faceResult?.yaw
-        let facePitch = faceResult?.pitch
-        let poseKeypoints = poseResult?.keypoints
-
-        // 밝기 계산
-        let brightness = poseMLAnalyzer.calculateBrightness(from: cgImage)
-
-        // 🆕 더치 틸트 감지 (RTMPose 키포인트 기반)
+        // 3. 기존 타입 호환을 위한 더미 값들
+        let faceRect: CGRect? = nil  // RTMPose는 얼굴 rect를 직접 제공하지 않음
+        let bodyRect: CGRect? = context.preciseBBox
+        let brightness: Double = 0.0  // 더 이상 사용하지 않음
         let tiltAngle = cameraAngleDetector.detectDutchTilt(faceObservation: nil) ?? 0.0
 
-        // 전신 영역 추정
-        let bodyRect = poseMLAnalyzer.estimateBodyRect(from: faceRect)
-
-        // 카메라 앵글 감지 (RTMPose 키포인트 기반)
+        // 4. 카메라 앵글 (키포인트 기반)
         let cameraAngle = cameraAngleDetector.detectCameraAngle(
             faceRect: faceRect,
-            facePitch: facePitch,
+            facePitch: nil,
             faceObservation: nil
         )
 
-        // 구도 타입 분류
-        var compositionType: CompositionType? = nil
-        if let faceRect = faceRect {
-            let subjectPosition = CGPoint(x: faceRect.midX, y: faceRect.midY)
-            compositionType = compositionAnalyzer.classifyComposition(subjectPosition: subjectPosition)
-        }
-
-        // 🗑️ 시선 추적 비활성화 (VNFaceObservation 제거)
-        let gaze: GazeResult? = nil
-
-        // 🔥 Depth Anything ML 기반 깊이 추정 (완전 비동기 처리)
-        // ✅ 세마포어 제거: 백그라운드 큐에서 비동기 체인으로 처리
-        // ⚠️ 메모리 최적화: autoreleasepool로 임시 메모리 즉시 해제
-
-        // 🆕 비율 감지 (먼저 계산)
-        let imageSize = CGSize(width: cgImage.width, height: cgImage.height)
-        let aspectRatio = CameraAspectRatio.detect(from: imageSize)
-
-        // 🔍 디버그: 레퍼런스 이미지 비율 감지 결과
-        let longSide = max(imageSize.width, imageSize.height)
-        let shortSide = min(imageSize.width, imageSize.height)
-        let rawRatio = longSide / shortSide
-        print("📐 [레퍼런스 비율] 이미지: \(Int(imageSize.width))x\(Int(imageSize.height)) → 비율: \(String(format: "%.3f", rawRatio)) → 감지: \(aspectRatio.displayName)")
-
-        // 🆕 여백 계산 (RTMPose 키포인트 기반)
-        // 🔧 RTMPose가 이미 정규화된 좌표(0.0~1.0)를 반환하므로 그대로 사용
+        // 5. 비율 및 여백
+        let aspectRatio = context.aspectRatio ?? .ratio4_3
         var padding: ImagePadding? = nil
         if let keypoints = poseKeypoints, keypoints.count >= 17 {
-            // 구조적 키포인트(0-16)로 여백 계산
             padding = calculatePaddingFromKeypoints(keypoints: keypoints)
         }
 
-        // 🆕 사진학 기반 프레이밍 분석 (RTMPose 133개 키포인트)
-        // 🔧 RTMPose가 이미 정규화된 좌표(0.0~1.0)를 반환하므로 그대로 사용
-        if let keypoints = poseKeypoints, keypoints.count >= 133 {
-            referenceFramingResult = photographyFramingAnalyzer.analyze(
-                keypoints: keypoints,
-                imageSize: imageSize
-            )
-            if let refFraming = referenceFramingResult {
-                // print("   - 📸 레퍼런스 샷 타입: \(refFraming.shotType.rawValue)")
-                // print("   - 📸 레퍼런스 헤드룸: \(String(format: "%.1f%%", refFraming.headroom * 100))")
-                // print("   - 📸 레퍼런스 카메라 앵글: \(refFraming.cameraAngle.rawValue)")
-            }
-        } else {
-            referenceFramingResult = nil
-            // print("   - ⚠️ 사진학 프레이밍 분석 불가 (키포인트 부족)")
-        }
+        // 6. 프레이밍 결과 저장
+        referenceFramingResult = context.framingResult
 
-        // 🔥 비동기 체인 시작: Depth 추정 → PersonDetector → 최종 분석 완료
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            guard let self = self else { return }
-
-            autoreleasepool {
-                // Step 1: Depth 추정 (비동기)
-                self.depthAnything.estimateDepth(from: image) { [weak self] result in
-                    guard let self = self else { return }
-
-                    let depth: V15DepthResult?
-                    switch result {
-                    case .success(let depthResult):
-                        depth = depthResult
-                        // print("✅ Depth Anything 분석 완료: 압축감 \(String(format: "%.2f", depthResult.compressionIndex))")
-                    case .failure(let error):
-                        // print("⚠️ Depth Anything 분석 실패: \(error.localizedDescription)")
-                        depth = nil
-                    }
-
-                    // Step 2: PersonDetector (비동기)
-                    if let ciImage = CIImage(image: image) {
-                        self.personDetector.detectPerson(in: ciImage) { [weak self] preciseBBox in
-                            guard let self = self else { return }
-
-                            // Step 3: 최종 분석 완료 (백그라운드에서)
-                            self.finalizeReferenceAnalysis(
-                                faceRect: faceRect,
-                                bodyRect: bodyRect,
-                                brightness: Double(brightness),
-                                tiltAngle: Double(tiltAngle),
-                                faceYaw: faceYaw.map { Double($0) },
-                                facePitch: facePitch.map { Double($0) },
-                                cameraAngle: cameraAngle,
-                                poseKeypoints: poseKeypoints,
-                                compositionType: compositionType,
-                                gaze: gaze,
-                                depth: depth,
-                                aspectRatio: aspectRatio,
-                                padding: padding,
-                                preciseBBox: preciseBBox,
-                                image: image,
-                                imageSize: imageSize
-                            )
-                        }
-                    } else {
-                        // PersonDetector 실행 불가 시 바로 완료
-                        self.finalizeReferenceAnalysis(
-                            faceRect: faceRect,
-                            bodyRect: bodyRect,
-                            brightness: Double(brightness),
-                            tiltAngle: Double(tiltAngle),
-                            faceYaw: faceYaw.map { Double($0) },
-                            facePitch: facePitch.map { Double($0) },
-                            cameraAngle: cameraAngle,
-                            poseKeypoints: poseKeypoints,
-                            compositionType: compositionType,
-                            gaze: gaze,
-                            depth: depth,
-                            aspectRatio: aspectRatio,
-                            padding: padding,
-                            preciseBBox: nil,
-                            image: image,
-                            imageSize: imageSize
-                        )
-                    }
-                }
-            }
-        }
+        // 7. 최종 분석 완료 처리
+        finalizeReferenceAnalysis(
+            faceRect: faceRect,
+            bodyRect: bodyRect,
+            brightness: brightness,
+            tiltAngle: Double(tiltAngle),
+            faceYaw: nil,
+            facePitch: nil,
+            cameraAngle: cameraAngle,
+            poseKeypoints: poseKeypoints,
+            compositionType: context.compositionType,
+            gaze: nil,
+            depth: depth,
+            aspectRatio: aspectRatio,
+            padding: padding,
+            preciseBBox: context.preciseBBox,
+            image: image,
+            imageSize: imageSize
+        )
     }
 
     // MARK: - 레퍼런스 분석 최종 처리 (비동기 완료 후)
@@ -794,13 +693,6 @@ class RealtimeAnalyzer: ObservableObject {
              return 
          }
 
-        // 🆕 모델 로딩 대기 (앱 시작 직후)
-        guard let analyzer = self.poseMLAnalyzer else {
-            // print("⏳ PoseMLAnalyzer 로딩 중... 분석 스킵")
-            resetAnalyzingFlag()
-            return
-        }
-
         let analysisStart = CACurrentMediaTime()  // 🔍 프로파일링
 
         // 🆕 YOLOX + RTMPose 분리 실행
@@ -818,7 +710,7 @@ class RealtimeAnalyzer: ObservableObject {
 
         if shouldRunRTMPose {
             let poseStart = CACurrentMediaTime()
-            let (face, pose) = analyzer.analyzeFaceAndPose(from: image)
+            let (face, pose) = poseService.analyzeFaceAndPose(from: image)
             faceResult = face
             poseResult = pose
 
@@ -863,8 +755,9 @@ class RealtimeAnalyzer: ObservableObject {
         }
     }
 
-    // MARK: - 분석 결과 처리 (메인 스레드)
-    private func processAnalysisResult(
+
+    // MARK: - 분석 결과 처리 (메인 스레드) - Extension에서 접근 필요
+    func processAnalysisResult(
         faceResult: FaceAnalysisResult?,
         poseResult: PoseAnalysisResult?,
         cgImage: CGImage,
@@ -938,7 +831,7 @@ class RealtimeAnalyzer: ObservableObject {
         }
 
         // 밝기 및 기울기
-        let brightness = poseMLAnalyzer.calculateBrightness(from: cgImage)
+        let brightness = poseService.calculateBrightness(from: cgImage)
         let tilt = cameraAngleDetector.detectDutchTilt(faceObservation: nil) ?? 0.0
 
         // 🆕 이미지 크기 (정규화에 필요)
@@ -950,7 +843,7 @@ class RealtimeAnalyzer: ObservableObject {
                 return calculateBodyRectFromKeypoints(keypoints, imageSize: imageSize)
             }
             // RTMPose 키포인트가 없으면 얼굴 기반 추정 (fallback) - 이미 정규화됨
-            return poseMLAnalyzer.estimateBodyRect(from: faceResult?.faceRect)
+            return poseService.estimateBodyRect(from: faceResult?.faceRect)
         }()
 
         // 카메라 앵글 (RTMPose 키포인트 기반)
@@ -1087,11 +980,27 @@ class RealtimeAnalyzer: ObservableObject {
 
             // 🆕 SimpleRealTimeGuide 평가 (GateSystem 대체)
             let hasPersonDetected = currentBBox.height > 0.05  // 최소 5% 이상이면 인물 감지
-            let simpleGuideResult = self.simpleRealTimeGuide.evaluate(
+            let legacyResult = self.simpleRealTimeGuide.evaluate(
                 currentKeypoints: currentPoseKeypoints ?? [],
                 hasPersonDetected: hasPersonDetected,
                 isFrontCamera: isFrontCamera,
                 currentZoom: self.currentZoomFactor  // 🆕 줌 정보 전달
+            )
+            
+            // Map Legacy -> New
+            let simpleGuideResult = SimpleGuideResult(
+                guide: GuideType(rawValue: legacyResult.guide.rawValue) ?? .enterFrame,
+                magnitude: legacyResult.magnitude,
+                progress: legacyResult.progress,
+                debugInfo: legacyResult.debugInfo,
+                shotTypeMatch: legacyResult.shotTypeMatch,
+                currentShotType: legacyResult.currentShotType,
+                targetShotType: legacyResult.targetShotType,
+                feedbackStage: FeedbackStage(rawValue: legacyResult.feedbackStage.rawValue) ?? .frameEntry,
+                tiltAngle: legacyResult.tiltAngle,
+                positionPercent: legacyResult.positionPercent,
+                currentZoom: legacyResult.currentZoom,
+                targetZoom: legacyResult.targetZoom
             )
 
             if let cached = self.cachedReference {
@@ -1110,20 +1019,16 @@ class RealtimeAnalyzer: ObservableObject {
 
                 // 🔥 무거운 연산: Gate System 평가 (백그라운드에서)
                 evaluation = self.gateSystem.evaluate(
-                    currentBBox: currentBBox,
+                    bbox: currentBBox,
+                    imageSize: currentImageSize,
                     referenceBBox: cached.bbox,
-                    currentImageSize: currentImageSize,
                     referenceImageSize: cached.imageSize,
-                    compressionIndex: currentCompressionIndex,
-                    referenceCompressionIndex: cached.compressionIndex,
-                    currentAspectRatio: currentAspectRatio,
-                    referenceAspectRatio: reference.aspectRatio,
-                    poseComparison: poseComparison,
                     isFrontCamera: isFrontCamera,
                     currentKeypoints: currentPoseKeypoints,
                     referenceKeypoints: referencePoseKeypoints,
-                    currentFocalLength: currentFocalLength,
-                    referenceFocalLength: self.referenceFocalLength
+                    poseComparison: poseComparison,
+                    focalLengthInfo: currentFocalLength,
+                    referenceFocalLengthInfo: self.referenceFocalLength
                 )
 
                 // 🔥 무거운 연산: UnifiedFeedback 생성 (백그라운드에서)

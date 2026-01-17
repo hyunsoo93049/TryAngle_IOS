@@ -5,12 +5,15 @@ import CoreVideo
 // MARK: - Depth Service
 
 public class DepthService: DepthEstimator {
+    // MARK: - Singleton
+    public static let shared = DepthService()
+
     public let name = "DepthAnything"
     public var isEnabled: Bool = true
-    
+
     // Existing Singleton usage
     private let core: DepthAnythingCoreML
-    
+
     public init() {
         self.core = DepthAnythingCoreML.shared
     }
@@ -25,8 +28,12 @@ public class DepthService: DepthEstimator {
     public func estimate(input: FrameInput) async throws -> DepthEstimationResult? {
         guard isEnabled else { return nil }
         
+        guard let image = input.image else {
+            return nil
+        }
+        
         return try await withCheckedThrowingContinuation { continuation in
-            core.estimateDepth(from: input.image) { result in
+            core.estimateDepth(from: image) { result in
                 switch result {
                 case .success(let v15Result):
                     // Convert V15DepthResult to DepthEstimationResult
