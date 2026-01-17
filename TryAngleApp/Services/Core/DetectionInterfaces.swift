@@ -63,11 +63,13 @@ public struct DepthEstimationResult: DetectionResult {
     public let timestamp: TimeInterval
     public let depthMap: CVPixelBuffer? // 또는 MLMultiArray
     public let compressionIndex: Float // 압축감 지수
+    public let focalLengthInfo: FocalLengthInfo? // 🆕 Lens Info
     
-    public init(timestamp: TimeInterval, depthMap: CVPixelBuffer?, compressionIndex: Float) {
+    public init(timestamp: TimeInterval, depthMap: CVPixelBuffer?, compressionIndex: Float, focalLengthInfo: FocalLengthInfo? = nil) {
         self.timestamp = timestamp
         self.depthMap = depthMap
         self.compressionIndex = compressionIndex
+        self.focalLengthInfo = focalLengthInfo
     }
 }
 

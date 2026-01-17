@@ -31,13 +31,21 @@ public class GateOrchestrator {
         // 기본값 (실행 안 된 경우 Fail 처리)
         let fallbackResult = GateResult(name: "Unknown", score: 0, threshold: 0, feedback: "Error", icon: "⚠️", category: "error")
         
+        // 샷타입 추출 (Gate 1 - FramingGate 결과에서)
+        var detectedShotType: ShotTypeGate?
+        if let gate1Result = gateResultsMap[1],
+           let meta = gate1Result.metadata,
+           let type = meta["shotType"] as? ShotTypeGate {
+            detectedShotType = type
+        }
+        
         return GateEvaluation(
             gate0: gateResultsMap[0] ?? fallbackResult,
             gate1: gateResultsMap[1] ?? fallbackResult,
             gate2: gateResultsMap[2] ?? fallbackResult,
             gate3: gateResultsMap[3] ?? fallbackResult,
             gate4: gateResultsMap[4] ?? fallbackResult,
-            currentShotType: nil, // TODO: Gate 1에서 반환된 정보로 채워야 함 (GateResult 확장 필요?)
+            currentShotType: detectedShotType,
             referenceShotType: context.reference?.shotType
         )
     }

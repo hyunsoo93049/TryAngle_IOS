@@ -3,7 +3,7 @@ import Vision
 import CoreGraphics
 
 // MARK: - 포즈 타입
-enum PoseType {
+public enum PoseType {
     case fullBody        // 전신 (머리 ~ 발목)
     case upperBody       // 상반신 (머리 ~ 골반)
     case portrait        // 흉상 (머리 ~ 어깨)
@@ -24,7 +24,7 @@ enum PoseType {
 }
 
 // MARK: - 키포인트 그룹 (RTMPose WholeBody 133개)
-enum KeypointGroup: String {
+public enum KeypointGroup: String {
     case head           // 머리 (코, 눈, 귀) - 0~4
     case shoulders      // 어깨 - 5, 6
     case arms           // 팔 (팔꿈치, 손목) - 7~10
@@ -75,7 +75,7 @@ enum KeypointGroup: String {
 }
 
 // MARK: - 포즈 비교 결과
-struct PoseComparisonResult {
+public struct PoseComparisonResult {
     let poseType: PoseType                  // 감지된 포즈 타입
     let visibleGroups: [KeypointGroup]      // 보이는 신체 부위
     let missingGroups: [KeypointGroup]      // 안 보이는 신체 부위
@@ -86,7 +86,7 @@ struct PoseComparisonResult {
 }
 
 // MARK: - 적응형 포즈 비교기 (RTMPose WholeBody 133개 키포인트 지원)
-class AdaptivePoseComparator {
+public class AdaptivePoseComparator {
 
     // 🆕 유연한 신뢰도 임계값 (Phase 2)
     private let highConfidenceThreshold: Float = 0.5    // 확실한 키포인트

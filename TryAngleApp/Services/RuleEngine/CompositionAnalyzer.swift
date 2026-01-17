@@ -2,7 +2,7 @@ import Foundation
 import CoreGraphics
 
 // MARK: - 구도 타입 분류
-enum CompositionType: Equatable {
+public enum CompositionType: Equatable {
     // 3분할 구도 (Rule of Thirds) - 9개 영역
     case ruleOfThirdsLeftUpper      // 왼쪽 상단 교점
     case ruleOfThirdsRightUpper     // 오른쪽 상단 교점
@@ -51,7 +51,7 @@ enum CompositionType: Equatable {
 }
 
 // MARK: - 구도 분석기
-class CompositionAnalyzer {
+public class RuleCompositionAnalyzer {
 
     // 허용 오차 (%)
     private let ruleOfThirdsTolerance: CGFloat = 0.08  // 8%
@@ -60,6 +60,8 @@ class CompositionAnalyzer {
 
     // 황금비율 상수
     private let goldenRatio: CGFloat = 0.618  // (√5 - 1) / 2 ≈ 0.618
+
+    public init() {}
 
     /// 피사체 위치로부터 구도 타입 자동 분류
     /// - Parameter subjectPosition: 피사체 중심 위치 (0~1 정규화 좌표)

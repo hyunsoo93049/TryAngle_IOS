@@ -4,15 +4,21 @@ import CoreGraphics
 // MARK: - Pose Keypoint
 
 /// 포즈 키포인트 (위치 + 신뢰도)
-struct PoseKeypoint {
-    let location: CGPoint
-    let confidence: Float
+/// 포즈 키포인트 (위치 + 신뢰도)
+public struct PoseKeypoint {
+    public let location: CGPoint
+    public let confidence: Float
+    
+    public init(location: CGPoint, confidence: Float) {
+        self.location = location
+        self.confidence = confidence
+    }
 }
 
 // MARK: - Camera Aspect Ratio
 
 /// 카메라 비율
-enum CameraAspectRatio: String, Codable, CaseIterable, Hashable {
+public enum CameraAspectRatio: String, Codable, CaseIterable, Hashable {
     case ratio16_9 = "16:9"
     case ratio4_3 = "4:3"
     case ratio1_1 = "1:1"
@@ -48,7 +54,7 @@ enum CameraAspectRatio: String, Codable, CaseIterable, Hashable {
 // MARK: - Feedback Category System
 
 /// 피드백 카테고리 (우선순위 순서)
-enum FeedbackCategory: String, Codable, CaseIterable {
+public enum FeedbackCategory: String, Codable, CaseIterable {
     case pose = "pose"               // 1순위: 포즈
     case position = "position"       // 2순위: 인물 위치 (프레임 내)
     case framing = "framing"         // 3순위: 프레이밍 (거리/줌)

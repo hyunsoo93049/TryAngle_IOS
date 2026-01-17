@@ -10,9 +10,10 @@ public struct GateResult: Equatable {
     public let feedback: String
     public let feedbackIcon: String  // 피드백 아이콘
     public let category: String      // 피드백 카테고리
-    public let debugInfo: String?    // 🆕 디버그용 추가 정보 (사용자 요청)
+    public let debugInfo: String?    // 🆕 디버그용 추가 정보
+    public let metadata: [String: Any]? // 🆕 메타데이터 (ShotType 등 전달용)
 
-    public init(name: String, score: CGFloat, threshold: CGFloat, feedback: String, icon: String = "📸", category: String = "general", debugInfo: String? = nil) {
+    public init(name: String, score: CGFloat, threshold: CGFloat, feedback: String, icon: String = "📸", category: String = "general", debugInfo: String? = nil, metadata: [String: Any]? = nil) {
         self.name = name
         self.score = score
         self.threshold = threshold
@@ -21,6 +22,15 @@ public struct GateResult: Equatable {
         self.feedbackIcon = icon
         self.category = category
         self.debugInfo = debugInfo
+        self.metadata = metadata
+    }
+    
+    // Equatable: Ignore metadata dictionary for comparison (not equatable)
+    public static func == (lhs: GateResult, rhs: GateResult) -> Bool {
+        return lhs.name == rhs.name &&
+               lhs.score == rhs.score &&
+               lhs.passed == rhs.passed &&
+               lhs.feedback == rhs.feedback
     }
     
     public var debugDescription: String {
@@ -224,5 +234,107 @@ public enum ShotTypeGate: Int, CaseIterable {
             width: maxX - minX,
             height: maxY - minY
         )
+    }
+}
+
+// MARK: - 전체 Gate 평가 결과
+public struct GateEvaluation: Equatable {
+    public let gate0: GateResult // 비율
+    public let gate1: GateResult // 프레임
+    public let gate2: GateResult // 위치
+    public let gate3: GateResult // 압축감
+    public let gate4: GateResult // 포즈
+
+    public let currentShotType: ShotTypeGate?
+    public let referenceShotType: ShotTypeGate?
+
+    public init(
+        gate0: GateResult,
+        gate1: GateResult,
+        gate2: GateResult,
+        gate3: GateResult,
+        gate4: GateResult,
+        currentShotType: ShotTypeGate? = nil,
+        referenceShotType: ShotTypeGate? = nil
+    ) {
+        self.gate0 = gate0
+        self.gate1 = gate1
+        self.gate2 = gate2
+        self.gate3 = gate3
+        self.gate4 = gate4
+        self.currentShotType = currentShotType
+        self.referenceShotType = referenceShotType
+    }
+
+    // MARK: - Computed Properties (기존 GateSystem 호환)
+
+    public var allPassed: Bool {
+        return gate0.passed && gate1.passed && gate2.passed && gate3.passed && gate4.passed
+    }
+
+    public var passedCount: Int {
+        return [gate0, gate1, gate2, gate3, gate4].filter { $0.passed }.count
+    }
+
+    public var overallScore: CGFloat {
+        let scores = [gate0.score, gate1.score, gate2.score, gate3.score, gate4.score]
+        return scores.reduce(0, +) / CGFloat(scores.count)
+    }
+
+    /// 통과 못한 첫 번째 Gate의 피드백 반환 (우선순위 기반)
+    /// 우선순위: 비율 → 프레이밍 → 위치 → 포즈 → 압축감
+    public var primaryFeedback: String {
+        if !gate0.passed { return gate0.feedback }  // 1. 비율 (필수)
+        if !gate1.passed { return gate1.feedback }  // 2. 프레이밍 (샷타입/크기)
+        if !gate2.passed { return gate2.feedback }  // 3. 위치 (좌우/상하)
+        if !gate4.passed { return gate4.feedback }  // 4. 포즈
+        if !gate3.passed { return gate3.feedback }  // 5. 압축감 (미세조정)
+        return "✓ 완벽한 구도입니다!"
+    }
+
+    public var allFeedbacks: [String] {
+        return [gate0, gate1, gate2, gate3, gate4]
+            .filter { !$0.passed }
+            .map { $0.feedback }
+    }
+
+    /// 현재 실패한 Gate 번호 (모두 통과 시 nil)
+    /// 우선순위: 비율 → 프레이밍 → 위치 → 포즈 → 압축감
+    public var currentFailedGate: Int? {
+        if !gate0.passed { return 0 }  // 비율
+        if !gate1.passed { return 1 }  // 프레이밍
+        if !gate2.passed { return 2 }  // 위치
+        if !gate4.passed { return 4 }  // 포즈
+        if !gate3.passed { return 3 }  // 압축감
+        return nil
+    }
+    
+    // 이전 GateSystem에 있던 디버그 요약 로직 이식
+    public var debugSummary: String {
+        let gates = [
+            ("비율", gate0),
+            ("프레이밍", gate1),
+            ("위치", gate2),
+            ("압축감", gate3),
+            ("포즈", gate4)
+        ]
+
+        // Gate 상태: ✓ or ✗ + 점수
+        let gateStatus = gates.map { name, gate in
+            let icon = gate.passed ? "✓" : "✗"
+            return "\(name)\(icon)\(Int(gate.score * 100))%"
+        }.joined(separator: " | ")
+
+        // 실패한 게이트 중 가장 낮은 우선순위(번호) 피드백 표시
+        // (Gate 0, 1, 2, 3, 4 순서)
+        var failedInfo = "→ 완벽!"
+        for (_, gate) in gates {
+            if !gate.passed {
+                failedInfo = "→ \(gate.feedback)"
+                break
+            }
+        }
+
+        return "🎯 [\(gateStatus)] \(failedInfo)"
     }
 }

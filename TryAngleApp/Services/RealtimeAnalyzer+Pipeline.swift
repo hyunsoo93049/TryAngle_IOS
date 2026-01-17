@@ -1,6 +1,7 @@
 import Foundation
 import UIKit
 import Combine
+import AVFoundation
 
 // MARK: - Pipeline Integration
 
@@ -61,12 +62,10 @@ extension RealtimeAnalyzer {
             // Map PoseDetectionResult -> PoseAnalysisResult
             // PoseAnalysisResult expects keypoints with confidences
             let keypoints = zip(pose.keypoints, pose.confidences).map { (point: $0, confidence: $1) }
-            
-            poseResult = PoseAnalysisResult(
-                keypoints: keypoints,
-                boundingBox: pose.roughBBox // roughBBox is CGRect
-            )
-            
+
+            // PoseAnalysisResult는 keypoints만 받음 (boundingBox 인자 없음)
+            poseResult = PoseAnalysisResult(keypoints: keypoints)
+
             // Simulate FaceResult from Pose if available
             // If pose has face keypoints (0..4), we can estimate face rect
             // Roughly index 0 is nose.
@@ -78,15 +77,19 @@ extension RealtimeAnalyzer {
                 let dummyRect = CGRect(x: nose.x - 0.1, y: nose.y - 0.1, width: 0.2, height: 0.2)
                 faceResult = FaceAnalysisResult(
                     faceRect: dummyRect,
+                    landmarks: nil,
                     yaw: 0,
                     pitch: 0,
-                    roll: 0
+                    roll: 0,
+                    observation: nil
                 )
             }
         }
-        
-        guard let cgImage = result.input.image.cgImage else { return }
-        
+
+        // Optional image unwrap
+        guard let image = result.input.image,
+              let cgImage = image.cgImage else { return }
+
         // 3. Call Legacy Processor
         self.processAnalysisResult(
             faceResult: faceResult,
@@ -94,7 +97,7 @@ extension RealtimeAnalyzer {
             cgImage: cgImage,
             reference: reference, // Passed safely
             isFrontCamera: result.input.cameraPosition == .front,
-            currentAspectRatio: CameraAspectRatio.detect(from: result.input.image.size)
+            currentAspectRatio: CameraAspectRatio.detect(from: image.size)
         )
     }
 }

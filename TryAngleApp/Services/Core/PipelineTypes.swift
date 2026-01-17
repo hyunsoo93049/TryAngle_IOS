@@ -1,6 +1,7 @@
 import Foundation
 import CoreGraphics
 import UIKit
+import AVFoundation
 
 // MARK: - Pipeline Data Types
 
@@ -11,7 +12,8 @@ public protocol DetectionResult {
 
 /// 분석에 사용될 입력 데이터
 public struct FrameInput {
-    public let image: UIImage
+    public let image: UIImage? // 🔧 Optional for metadata-only processing
+    public let imageSize: CGSize // 🆕 Direct access to size
     public let timestamp: TimeInterval
     public let cameraPosition: AVCaptureDevice.Position
     public let orientation:  UIImage.Orientation
@@ -19,12 +21,21 @@ public struct FrameInput {
     // 추가적인 메타데이터 (Exif 등)
     public let metadata: [String: Any]?
     
-    public init(image: UIImage, 
+    public init(image: UIImage? = nil, 
+                imageSize: CGSize? = nil,
                 timestamp: TimeInterval = Date().timeIntervalSince1970, 
                 cameraPosition: AVCaptureDevice.Position = .back,
                 orientation: UIImage.Orientation = .up,
                 metadata: [String: Any]? = nil) {
         self.image = image
+        // 🔧 Derive size from image if provided, otherwise required
+        if let img = image {
+            self.imageSize = img.size
+        } else if let size = imageSize {
+            self.imageSize = size
+        } else {
+            self.imageSize = .zero
+        }
         self.timestamp = timestamp
         self.cameraPosition = cameraPosition
         self.orientation = orientation
@@ -42,6 +53,7 @@ public struct FrameAnalysisResult {
     public var depthResult: DepthEstimationResult?
     public var segmentationResult: SegmentationResult?
     public var compositionResult: CompositionResult?
+    public var poseComparison: PoseComparisonResult? // 🆕 Added for Gate 4
     
     public init(input: FrameInput, timestamp: TimeInterval = Date().timeIntervalSince1970) {
         self.input = input

@@ -12,7 +12,7 @@ public class AestheticService: CompositionAnalyzer {
     // For now, we'll wrap the existing one if possible, or implement basic logic.
     // Since `CompositionAnalyzer.swift` is simple (looked at RealtimeAnalyzer reference), we can instantiate it.
     
-    private let legacyAnalyzer = CompositionAnalyzer()
+    private let legacyAnalyzer = RuleCompositionAnalyzer()
     
     public init() {}
     
@@ -42,10 +42,10 @@ public class AestheticService: CompositionAnalyzer {
              // Let's assume normalized for now or check file if needed. 
              // RealtimeAnalyzer passed: subjectPosition = CGPoint(x: faceRect.midX, y: faceRect.midY) which was normalized.
              
-             if let compositionType = legacyAnalyzer.classifyComposition(subjectPosition: center) {
-                 feedback.append("Detected Composition: \(compositionType.rawValue)")
-                 score = 0.8 // Dummy score
-             }
+             // classifyComposition returns non-optional CompositionType
+             let compositionType = legacyAnalyzer.classifyComposition(subjectPosition: center)
+             feedback.append("Detected Composition: \(compositionType.description)")
+             score = 0.8 // Dummy score
         }
         
         // Add Depth feedback if available
