@@ -2,31 +2,31 @@ import Foundation
 import UIKit
 
 // MARK: - RTMPose Service Adapter
+// 역할: RTMPoseRunner 싱글톤을 사용하여 포즈 검출 서비스를 제공합니다.
+//       PoseDetector 프로토콜을 구현하여 DetectionPipeline에서 사용됩니다.
+//       실시간 분석용 얼굴+포즈 동시 분석 기능도 제공합니다.
 
 public class RTMPoseService: PoseDetector {
+
+    // MARK: - Singleton
+    public static let shared = RTMPoseService()
+
     public let name = "RTMPose"
     public var isEnabled: Bool = true
-    
-    // 기존 Runner 재사용
-    private var runner: RTMPoseRunner?
-    
+
+    // 싱글톤 Runner 사용
+    private var runner: RTMPoseRunner? { RTMPoseRunner.shared }
+
     public init() {}
-    
+
     public func initialize() async throws {
-        // 백그라운드 스레드에서 초기화 (ONNX 모델 로딩 등)
-        print("🚀 RTMPoseService initializing...")
-        
-        return try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-                if let runner = RTMPoseRunner() {
-                    self?.runner = runner
-                    print("✅ RTMPoseService initialized successfully.")
-                    continuation.resume()
-                } else {
-                    continuation.resume(throwing: NSError(domain: "RTMPoseService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to initialize RTMPoseRunner"]))
-                }
-            }
+        // 싱글톤이므로 별도 초기화 불필요 (앱 시작 시 이미 초기화됨)
+        print("🚀 RTMPoseService initializing (using shared RTMPoseRunner)...")
+
+        guard runner != nil else {
+            throw NSError(domain: "RTMPoseService", code: -1, userInfo: [NSLocalizedDescriptionKey: "RTMPoseRunner.shared is nil"])
         }
+        print("✅ RTMPoseService initialized successfully (shared runner).")
     }
     
     public func detect(input: FrameInput) async throws -> PoseDetectionResult? {
@@ -38,8 +38,8 @@ public class RTMPoseService: PoseDetector {
         return try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
                 // 1. Pose Inference
-                guard let result = runner.detectPose(from: input.image),
-                      let firstPerson = result.first else {
+                guard let image = input.image,
+                      let result = runner.detectPose(from: image) else {
                     // 감지 실패 또는 사람 없음
                     continuation.resume(returning: nil)
                     return
@@ -47,15 +47,15 @@ public class RTMPoseService: PoseDetector {
                 
                 // 2. Convert raw keypoints to Result format
                 // RTMPoseResult uses (point: CGPoint, confidence: Float)
-                let keypoints = firstPerson.keypoints.map { $0.point }
-                let confidences = firstPerson.keypoints.map { $0.confidence }
-                let bbox = firstPerson.boundingBox ?? CGRect.zero
+                let keypoints = result.keypoints.map { $0.point }
+                let confidences = result.keypoints.map { $0.confidence }
+                let bbox = result.boundingBox ?? CGRect.zero
                 
                 // 3. Optional: Calculate ShotType/LowestPart logic here or in a separate analyzer.
                 // For now, we perform basic analysis to populate the fields.
                 // We'll reuse the logic from GateSystem/ShotTypeGate logically here.
                 
-                let analysis = self.analyzePose(keypoints: firstPerson.keypoints)
+                let analysis = self.analyzePose(keypoints: result.keypoints)
                 
                 let poseResult = PoseDetectionResult(
                     timestamp: input.timestamp,
@@ -132,5 +132,146 @@ public class RTMPoseService: PoseDetector {
         }
         
         return PoseAnalysis(lowestPart: lowestPart, shotType: shotType)
+    }
+
+    // MARK: - 실시간 분석용 얼굴+포즈 동시 분석 (동기 버전)
+
+    /// 얼굴 + 포즈 동시 분석 (RealtimeAnalyzer에서 사용)
+    func analyzeFaceAndPose(from image: UIImage) -> (face: FaceAnalysisResult?, pose: PoseAnalysisResult?) {
+        guard let runner = runner else {
+            return (nil, nil)
+        }
+
+        // RTMPose로 포즈 감지
+        guard let rtmResult = runner.detectPose(from: image) else {
+            return (nil, nil)
+        }
+
+        // PoseAnalysisResult 생성
+        let poseResult = PoseAnalysisResult(keypoints: rtmResult.keypoints)
+
+        // 얼굴 정보 추출 (RTMPose 키포인트 기반)
+        let faceResult = extractFaceFromPose(poseResult: poseResult, imageSize: image.size)
+
+        return (faceResult, poseResult)
+    }
+
+    // MARK: - RTMPose 키포인트에서 얼굴 정보 추출
+
+    private func extractFaceFromPose(poseResult: PoseAnalysisResult?, imageSize: CGSize) -> FaceAnalysisResult? {
+        guard let pose = poseResult, pose.keypoints.count >= 23 else {
+            return nil
+        }
+
+        // RTMPose 얼굴 키포인트 (23~90번): 68개
+        let faceKeypoints = Array(pose.keypoints[23..<min(91, pose.keypoints.count)])
+
+        // 신뢰도 있는 얼굴 키포인트 필터링
+        let validFacePoints = faceKeypoints.filter { $0.confidence > 0.3 }
+        guard validFacePoints.count >= 5 else {
+            return nil  // 최소 5개 이상의 키포인트 필요
+        }
+
+        // 얼굴 바운딩 박스 계산
+        let facePoints = validFacePoints.map { $0.point }
+        let minX = facePoints.map { $0.x }.min() ?? 0
+        let maxX = facePoints.map { $0.x }.max() ?? 0
+        let minY = facePoints.map { $0.y }.min() ?? 0
+        let maxY = facePoints.map { $0.y }.max() ?? 0
+
+        // 정규화된 좌표로 변환 (0.0 ~ 1.0)
+        let faceRect = CGRect(
+            x: minX / imageSize.width,
+            y: minY / imageSize.height,
+            width: (maxX - minX) / imageSize.width,
+            height: (maxY - minY) / imageSize.height
+        )
+
+        // yaw, pitch, roll 추정 (RTMPose 눈/코/입 키포인트에서)
+        let (yaw, pitch, roll) = estimateFaceAngles(from: pose.keypoints, imageSize: imageSize)
+
+        return FaceAnalysisResult(
+            faceRect: faceRect,
+            landmarks: nil,  // Vision landmarks 없음
+            yaw: yaw,
+            pitch: pitch,
+            roll: roll,
+            observation: nil  // VNFaceObservation 없음
+        )
+    }
+
+    // MARK: - 얼굴 각도 추정 (RTMPose 키포인트 기반)
+
+    private func estimateFaceAngles(from keypoints: [(point: CGPoint, confidence: Float)], imageSize: CGSize) -> (Float?, Float?, Float?) {
+        guard keypoints.count >= 17 else { return (nil, nil, nil) }
+
+        // 눈 키포인트 (1: left_eye, 2: right_eye)
+        let leftEye = keypoints[1]
+        let rightEye = keypoints[2]
+        let nose = keypoints[0]
+
+        guard leftEye.confidence > 0.5, rightEye.confidence > 0.5 else {
+            return (nil, nil, nil)
+        }
+
+        // Roll (좌우 기울기): 두 눈의 y 차이
+        let eyeDy = leftEye.point.y - rightEye.point.y
+        let eyeDx = leftEye.point.x - rightEye.point.x
+        let roll = atan2(eyeDy, eyeDx)  // 라디안
+
+        // Yaw (좌우 회전): 두 눈의 x 거리 비율
+        let eyeDistance = abs(leftEye.point.x - rightEye.point.x)
+        let faceWidth = imageSize.width * 0.3  // 평균 얼굴 너비
+        let yaw = (eyeDistance - faceWidth) / faceWidth * 0.5  // 정규화
+
+        // Pitch (상하 각도): 코와 눈의 y 차이
+        let pitch: Float? = nose.confidence > 0.5 ? Float((nose.point.y - leftEye.point.y) / imageSize.height) : nil
+
+        return (Float(yaw), pitch, Float(roll))
+    }
+
+    // MARK: - 유틸리티
+
+    /// 밝기 계산
+    public func calculateBrightness(from cgImage: CGImage) -> Float {
+        let width = min(cgImage.width, 100)
+        let height = min(cgImage.height, 100)
+
+        guard let context = CGContext(
+            data: nil,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: width * 4,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ) else { return 0.5 }
+
+        context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+        guard let data = context.data else { return 0.5 }
+
+        let buffer = data.bindMemory(to: UInt8.self, capacity: width * height * 4)
+        var totalBrightness: Float = 0
+
+        for i in stride(from: 0, to: width * height * 4, by: 4) {
+            let r = Float(buffer[i]) / 255.0
+            let g = Float(buffer[i + 1]) / 255.0
+            let b = Float(buffer[i + 2]) / 255.0
+            totalBrightness += (r + g + b) / 3.0
+        }
+
+        return totalBrightness / Float(width * height)
+    }
+
+    /// 전신 영역 추정 (fallback용)
+    public func estimateBodyRect(from faceRect: CGRect?) -> CGRect? {
+        guard let face = faceRect else { return nil }
+
+        let bodyWidth = face.width * 3
+        let bodyHeight = face.height * 7
+        let bodyX = face.midX - bodyWidth / 2
+        let bodyY = face.minY
+
+        return CGRect(x: bodyX, y: bodyY, width: bodyWidth, height: bodyHeight)
     }
 }
