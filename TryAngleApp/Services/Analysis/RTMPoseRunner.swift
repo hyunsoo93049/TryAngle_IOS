@@ -194,19 +194,16 @@ class RTMPoseRunner {
         }
 
         // 1. YOLO11n CoreML로 사람 검출
-        let boundingBox: CGRect
-        if let detectedBox = detectPersonWithCoreML(from: image, model: yoloModel) {
-            print("✅ YOLO11n: 사람 검출 성공 - \(detectedBox)")
-            boundingBox = detectedBox
-        } else {
-            // YOLO11n이 사람을 검출하지 못하면 전체 이미지 사용
-            print("⚠️ YOLO11n: 사람을 검출하지 못함 → 전체 이미지로 포즈 추정 시도")
-            guard let cgImage = image.cgImage else { return nil }
-            boundingBox = CGRect(x: 0, y: 0, width: cgImage.width, height: cgImage.height)
+        guard let detectedBox = detectPersonWithCoreML(from: image, model: yoloModel) else {
+            // 🔧 수정: 사람 검출 실패 시 RTMPose 실행 안 함
+            print("⚠️ YOLO11n: 사람 검출 안됨 → 포즈 추정 건너뜀")
+            return nil
         }
 
+        print("✅ YOLO11n: 사람 검출 성공 - \(detectedBox)")
+
         // 2. 검출된 영역으로 포즈 추정
-        let keypoints = estimatePose(from: image, boundingBox: boundingBox, using: poseSession, env: env)
+        let keypoints = estimatePose(from: image, boundingBox: detectedBox, using: poseSession, env: env)
 
         if let keypoints = keypoints {
             print("✅ RTMPose: \(keypoints.count)개 키포인트 검출 성공")
@@ -214,7 +211,7 @@ class RTMPoseRunner {
             print("❌ RTMPose: 포즈 추정 실패")
         }
 
-        return keypoints.map { RTMPoseResult(keypoints: $0, boundingBox: boundingBox) }
+        return keypoints.map { RTMPoseResult(keypoints: $0, boundingBox: detectedBox) }
     }
 
     // MARK: - YOLO11n CoreML 사람 검출 (단일)

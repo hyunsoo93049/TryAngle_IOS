@@ -11,11 +11,13 @@ public class DepthService: DepthEstimator {
     public let name = "DepthAnything"
     public var isEnabled: Bool = true
 
-    // Existing Singleton usage
-    private let core: DepthAnythingCoreML
+    // 🔧 수정: computed property로 변경 (항상 최신 shared 인스턴스 사용)
+    private var core: DepthAnythingCoreML {
+        DepthAnythingCoreML.shared
+    }
 
     public init() {
-        self.core = DepthAnythingCoreML.shared
+        // 초기화 시 아무것도 하지 않음 - core는 사용 시점에 접근
     }
     
     public func initialize() async throws {
