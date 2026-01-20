@@ -40,7 +40,12 @@ public struct ReferenceData {
     public let keypoints: [PoseKeypoint]?
     public let focalLength: FocalLengthInfo?
     public let shotType: ShotTypeGate? // 미리 분석된 레퍼런스 샷타입
-    
+
+    // 🆕 LensDistanceGate용 추가 필드
+    public let shoulderRatio: CGFloat?      // 레퍼런스 어깨 픽셀 비율 (0~1)
+    public let estimatedDistance: Float?    // 레퍼런스 추정 거리 (meters)
+
+    // 기존 호환성 유지하는 init (기본값 nil)
     public init(bbox: CGRect?, imageSize: CGSize?, compressionIndex: CGFloat?, aspectRatio: CameraAspectRatio, keypoints: [PoseKeypoint]?, focalLength: FocalLengthInfo?, shotType: ShotTypeGate?) {
         self.bbox = bbox
         self.imageSize = imageSize
@@ -49,6 +54,21 @@ public struct ReferenceData {
         self.keypoints = keypoints
         self.focalLength = focalLength
         self.shotType = shotType
+        self.shoulderRatio = nil
+        self.estimatedDistance = nil
+    }
+
+    // 🆕 전체 필드 init
+    public init(bbox: CGRect?, imageSize: CGSize?, compressionIndex: CGFloat?, aspectRatio: CameraAspectRatio, keypoints: [PoseKeypoint]?, focalLength: FocalLengthInfo?, shotType: ShotTypeGate?, shoulderRatio: CGFloat?, estimatedDistance: Float?) {
+        self.bbox = bbox
+        self.imageSize = imageSize
+        self.compressionIndex = compressionIndex
+        self.aspectRatio = aspectRatio
+        self.keypoints = keypoints
+        self.focalLength = focalLength
+        self.shotType = shotType
+        self.shoulderRatio = shoulderRatio
+        self.estimatedDistance = estimatedDistance
     }
 }
 
@@ -57,11 +77,27 @@ public struct GateSettings {
     public let thresholds: GateThresholds
     public let difficultyMultiplier: CGFloat
     public let targetZoomFactor: CGFloat?
-    
+
+    // 🆕 LensDistanceGate용 추가 필드
+    public let currentZoomFactor: CGFloat   // 현재 줌 배율
+    public let bodyType: BodyType           // 사용자 체형 설정
+
+    // 기존 호환성 유지하는 init (기본값 적용)
     public init(thresholds: GateThresholds, difficultyMultiplier: CGFloat, targetZoomFactor: CGFloat?) {
         self.thresholds = thresholds
         self.difficultyMultiplier = difficultyMultiplier
         self.targetZoomFactor = targetZoomFactor
+        self.currentZoomFactor = 1.0        // 기본값: 1x
+        self.bodyType = .medium             // 기본값: 보통 체형
+    }
+
+    // 🆕 전체 필드 init
+    public init(thresholds: GateThresholds, difficultyMultiplier: CGFloat, targetZoomFactor: CGFloat?, currentZoomFactor: CGFloat, bodyType: BodyType) {
+        self.thresholds = thresholds
+        self.difficultyMultiplier = difficultyMultiplier
+        self.targetZoomFactor = targetZoomFactor
+        self.currentZoomFactor = currentZoomFactor
+        self.bodyType = bodyType
     }
 }
 
