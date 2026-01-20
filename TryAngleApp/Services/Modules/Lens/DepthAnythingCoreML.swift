@@ -46,14 +46,8 @@ class DepthAnythingCoreML {
 
     // MARK: - 모델 설정
     private func setupModel() {
-        // 방법 1: Apple 공식 CoreML 모델 사용 (다운로드 필요)
+        // 🔧 수정: Xcode 자동 생성 클래스 사용 (Bundle 경로 문제 해결)
         // https://huggingface.co/apple/coreml-depth-anything-v2-small
-
-        guard let modelURL = Bundle.main.url(forResource: modelType.modelName, withExtension: "mlmodelc") else {
-            print("❌ Depth Anything 모델 파일을 찾을 수 없습니다")
-            print("   다운로드: https://huggingface.co/apple/coreml-depth-anything-v2-small")
-            return
-        }
 
         do {
             logMemory("Depth Anything 로드 전")
@@ -62,12 +56,14 @@ class DepthAnythingCoreML {
             let config = MLModelConfiguration()
             config.computeUnits = .all  // Neural Engine + GPU + CPU 자동 선택
 
-            let mlModel = try MLModel(contentsOf: modelURL, configuration: config)
-            model = try VNCoreMLModel(for: mlModel)
+            // 🔧 자동 생성된 DepthAnythingV2SmallF16 클래스 사용
+            let depthModel = try DepthAnythingV2SmallF16(configuration: config)
+            model = try VNCoreMLModel(for: depthModel.model)
             print("✅ Depth Anything CoreML 모델 로드 성공 (Neural Engine 가속)")
             logMemory("Depth Anything 로드 후")
         } catch {
             print("❌ Depth Anything 모델 로드 실패: \(error)")
+            print("   원인: \(error.localizedDescription)")
         }
     }
 
