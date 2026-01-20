@@ -69,26 +69,25 @@ class RTMPoseRunner {
         // 🔥 이 init은 백그라운드 스레드에서만 호출됨
         print("🚀 RTMPoseRunner init() 시작 (백그라운드)")
 
-        // YOLO11n CoreML 모델 (사람 검출) - 메모리 효율적
-        guard let yoloURL = Bundle.main.url(forResource: "YOLO11nDetector", withExtension: "mlmodelc") else {
-            print("❌ YOLO11nDetector.mlmodelc 파일을 찾을 수 없습니다")
-            return nil
-        }
-
         // RTMPose ONNX 모델 (포즈 추정)
-        guard let poseURL = Bundle.main.url(forResource: "rtmpose_int8", withExtension: "onnx") else {
+        // 🔧 수정: Bundle(for:) 사용하여 올바른 번들에서 찾기
+        let poseURL: URL? = Bundle(for: RTMPoseRunner.self).url(forResource: "rtmpose_int8", withExtension: "onnx")
+            ?? Bundle.main.url(forResource: "rtmpose_int8", withExtension: "onnx")
+
+        guard let poseURL = poseURL else {
             print("❌ rtmpose_int8.onnx 파일을 찾을 수 없습니다")
+            print("   Bundle(for:) 경로: \(Bundle(for: RTMPoseRunner.self).bundlePath)")
+            print("   Bundle.main 경로: \(Bundle.main.bundlePath)")
             return nil
         }
 
         poseModelPath = poseURL.path
 
         print("✅ 모델 경로 확인:")
-        print("   Detector (YOLO11n CoreML): \(yoloURL.path)")
         print("   Pose (RTMPose ONNX): \(poseModelPath)")
 
-        // CoreML 모델 로드 (백그라운드)
-        setupCoreMLDetector(yoloURL: yoloURL)
+        // 🔧 수정: Xcode 자동 생성 YOLO11nDetector 클래스 사용
+        setupCoreMLDetector()
 
         // ONNX Runtime 초기화 (백그라운드)
         setupONNXRuntime()
@@ -99,21 +98,23 @@ class RTMPoseRunner {
     }
 
     // MARK: - CoreML Detector 초기화 (YOLO11n)
-    private func setupCoreMLDetector(yoloURL: URL) {
+    // 🔧 수정: Xcode 자동 생성 클래스 사용 (Bundle 경로 문제 해결)
+    private func setupCoreMLDetector() {
         print("🔧 YOLO11n CoreML 초기화 시작...")
         logMemory("YOLO11n 로드 전")
 
         do {
-            // CoreML 모델 로드 (컴파일)
+            // 🔧 자동 생성된 YOLO11nDetector 클래스 사용
             let config = MLModelConfiguration()
             config.computeUnits = .all  // Neural Engine + GPU + CPU 자동 선택
 
-            let mlModel = try MLModel(contentsOf: yoloURL, configuration: config)
-            yoloModel = try VNCoreMLModel(for: mlModel)
+            let yolo = try YOLO11nDetector(configuration: config)
+            yoloModel = try VNCoreMLModel(for: yolo.model)
             print("✅ YOLO11n CoreML 로드 성공 (Neural Engine 가속)")
             logMemory("YOLO11n 로드 후")
         } catch {
             print("❌ YOLO11n CoreML 로드 실패: \(error)")
+            print("   원인: \(error.localizedDescription)")
             yoloModel = nil
         }
     }
