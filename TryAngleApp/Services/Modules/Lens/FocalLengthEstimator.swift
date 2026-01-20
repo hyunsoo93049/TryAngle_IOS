@@ -103,18 +103,14 @@ class FocalLengthEstimator {
     /// 줌 배율에서 35mm 환산 초점거리 계산
     /// - Parameter zoomFactor: 카메라 줌 배율 (0.5, 1.0, 2.0, 3.0 등)
     /// - Returns: 35mm 환산 초점거리 정보
+    /// - Note: DeviceLensConfig를 통해 기기별 정확한 초점거리 반환
     func focalLengthFromZoom(_ zoomFactor: CGFloat) -> FocalLengthInfo {
-        // 아이폰 기준: 1x = 24mm
-        // 0.5x = 13mm (초광각)
-        // 1x = 24mm (광각)
-        // 2x = 48mm (표준)
-        // 3x = 72mm (준망원)
-        // 5x = 120mm (망원)
-
-        let focalLength = Int(round(CGFloat(Self.iPhoneBaseFocalLength) * zoomFactor))
+        // 🔧 수정: DeviceLensConfig에 위임하여 기기별 정확한 값 사용
+        // 기존: let focalLength = Int(round(CGFloat(Self.iPhoneBaseFocalLength) * zoomFactor))
+        let focalLength = DeviceLensConfig.shared.focalLengthMM(for: zoomFactor)
 
         return FocalLengthInfo(
-            focalLength35mm: max(13, focalLength),  // 최소 13mm (0.5x)
+            focalLength35mm: focalLength,
             source: .zoomFactor,
             confidence: 1.0  // 줌 배율은 정확함
         )
