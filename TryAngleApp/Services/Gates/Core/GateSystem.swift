@@ -59,7 +59,7 @@ public class GateSystem {
         orchestrator.register(gate: AspectRatioGate())
         orchestrator.register(gate: FramingGate())
         orchestrator.register(gate: PositionGate())
-        orchestrator.register(gate: CompressionGate())
+        orchestrator.register(gate: LensDistanceGate())  // 🔧 CompressionGate → LensDistanceGate 교체
         orchestrator.register(gate: PoseGate())
     }
 
@@ -109,25 +109,17 @@ public class GateSystem {
         var analysis = FrameAnalysisResult(input: input)
         
         // Populate analysis results from legacy params
-        // Pose
-        if let kps = currentKeypoints {
-            // Rough reconstruction of PoseResult
-            // Note: PoseDetectionResult definition in PipelineTypes might require different args.
-            // Assuming: init(timestamp: TimeInterval, keypoints: [PoseKeypoint], confidences: [Float], roughBBox: CGRect, lowestBodyPart: String?, shotType: ShotType?)
-            
-            // To be safe, we check Definitions first or use a minimal init if available.
-            // Since I can't see the exact init of PoseDetectionResult in this context (it wasn't in PipelineTypes view),
-            // I will assume it follows the file I saw earlier or standard struct memberwise init.
-            
-            // Let's rely on standard init for now, adjusting to typical fields.
-            // If PipelineTypes.swift didn't show PoseDetectionResult, it must be elsewhere.
-            // Wait, I viewed PipelineTypes.swift and it had `PoseDetectionResult?` property but didn't show `struct PoseDetectionResult`.
-            // Use grep to find PoseDetectionResult definition.
-            
-            // Temporary fix: Use a minimal construction or placeholder if struct is complex.
-            // Use metadata-based assignment or rely on what's available.
-            
-            // Actually, I should find PoseDetectionResult definition before guessing.
+        // 🔧 수정: PoseDetectionResult 제대로 생성
+        if let kps = currentKeypoints, !kps.isEmpty {
+            let keypointLocations = kps.map { $0.location }
+            let confidences = kps.map { $0.confidence }
+
+            analysis.poseResult = PoseDetectionResult(
+                timestamp: Date().timeIntervalSince1970,
+                keypoints: keypointLocations,
+                confidences: confidences,
+                roughBBox: bbox  // 파라미터로 전달된 bbox 사용
+            )
         }
         
         // 2. Construct Reference Data
@@ -142,10 +134,13 @@ public class GateSystem {
         )
         
         // 3. Construct Settings
+        // 🔧 수정: currentZoomFactor, bodyType 추가 (LensDistanceGate용)
         let settings = GateSettings(
             thresholds: currentThresholds,
             difficultyMultiplier: 1.0,
-            targetZoomFactor: targetZoomFactor
+            targetZoomFactor: targetZoomFactor,
+            currentZoomFactor: currentZoomFactor,
+            bodyType: .medium  // TODO: 사용자 설정에서 가져오도록 변경
         )
         
         // 4. Create Context
