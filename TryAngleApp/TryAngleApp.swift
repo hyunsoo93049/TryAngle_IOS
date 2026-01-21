@@ -3,14 +3,18 @@ import SwiftUI
 @main
 struct TryAngleApp: App {
     init() {
-        print("     - Initializing application...")
-
+        // 🔧 로깅 시스템 설정
         configureLogging()
         
-        logMemory("     - Application started")
+        AppLogger.shared.info("+ start init system manager", category: "App")
+        
+        // 📊 시스템 모니터링 시작 (10초 간격)
+        SystemMonitor.shared.startPeriodicMonitoring(interval: 10.0)
 
-        // AI 모델 백그라운드 초기화 (메인 스레드 블로킹 방지)
+        // 🔥 AI 모델 백그라운드 초기화 (메인 스레드 블로킹 방지)
         initializeMLModelsInBackground()
+        
+        AppLogger.shared.info("- end init system manager", category: "App")
     }
     
     /// 로깅 시스템 초기 설정
