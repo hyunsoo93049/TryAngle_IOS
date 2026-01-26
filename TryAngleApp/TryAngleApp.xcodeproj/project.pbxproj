@@ -21,6 +21,8 @@
 		6C46BCC82EC9CA8B00C72C0F /* TryAngleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TryAngleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6C55CD212EE7E7DA00B6A1B3 /* TryAngleApp.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = TryAngleApp.xcodeproj; sourceTree = "<group>"; };
 		6C5E569B2F193B1900BFB65D /* TryAngleApp.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = TryAngleApp.xcodeproj; sourceTree = "<group>"; };
+		6C5E58322F1FD41900BFB65D /* TryAngleApp.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = TryAngleApp.xcodeproj; sourceTree = "<group>"; };
+		6C5E59C02F1FD5F300BFB65D /* TryAngleApp.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = TryAngleApp.xcodeproj; sourceTree = "<group>"; };
 		6C726E762EC9CDB000DDA131 /* TryAngleApp.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = TryAngleApp.xcodeproj; sourceTree = "<group>"; };
 		6C7C90992EE806A800A92273 /* TryAngleApp.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = TryAngleApp.xcodeproj; sourceTree = "<group>"; };
 		6C94E97F2EE8379500504E61 /* TryAngleApp.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = TryAngleApp.xcodeproj; sourceTree = "<group>"; };
@@ -129,6 +131,16 @@
 			sourceTree = "<group>";
 		};
 		6C5E569D2F193B1900BFB65D /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
+		6C5E58342F1FD41900BFB65D /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
+		6C5E59C22F1FD5F300BFB65D /* Products */ = {
 			isa = PBXGroup;
 			name = Products;
 			sourceTree = "<group>";
@@ -321,10 +333,6 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 6CE414962ECF8502003DE68C /* Products */;
-					ProjectRef = 6CE414922ECF8502003DE68C /* TryAngleApp.xcodeproj */;
-				},
-				{
 					ProductGroup = 6C058B8C2EE7E12C0037603D /* Products */;
 					ProjectRef = 6C058B8A2EE7E12C0037603D /* TryAngleApp.xcodeproj */;
 				},
@@ -333,12 +341,12 @@
 					ProjectRef = 6CE41A482ED59BB0003DE68C /* TryAngleApp.xcodeproj */;
 				},
 				{
-					ProductGroup = 6CD9B77C2ECD559F00CC618D /* Products */;
-					ProjectRef = 6CD9B77A2ECD559F00CC618D /* TryAngleApp.xcodeproj */;
+					ProductGroup = 6C5E59C22F1FD5F300BFB65D /* Products */;
+					ProjectRef = 6C5E59C02F1FD5F300BFB65D /* TryAngleApp.xcodeproj */;
 				},
 				{
-					ProductGroup = 6CC70AA12EE95675006BD56B /* Products */;
-					ProjectRef = 6CC70A9F2EE95675006BD56B /* TryAngleApp.xcodeproj */;
+					ProductGroup = 6C5E569D2F193B1900BFB65D /* Products */;
+					ProjectRef = 6C5E569B2F193B1900BFB65D /* TryAngleApp.xcodeproj */;
 				},
 				{
 					ProductGroup = 6C05881A2EE512220037603D /* Products */;
@@ -353,8 +361,48 @@
 					ProjectRef = 6CE41CAF2ED702CD003DE68C /* TryAngleApp.xcodeproj */;
 				},
 				{
-					ProductGroup = 6C5E569D2F193B1900BFB65D /* Products */;
-					ProjectRef = 6C5E569B2F193B1900BFB65D /* TryAngleApp.xcodeproj */;
+					ProductGroup = 6CE412102ECF58F4003DE68C /* Products */;
+					ProjectRef = 6CE4120C2ECF58F4003DE68C /* TryAngleApp.xcodeproj */;
+				},
+				{
+					ProductGroup = 6C05849D2EE323E60037603D /* Products */;
+					ProjectRef = 6C0584992EE323E60037603D /* TryAngleApp.xcodeproj */;
+				},
+				{
+					ProductGroup = 6C94E9812EE8379500504E61 /* Products */;
+					ProjectRef = 6C94E97F2EE8379500504E61 /* TryAngleApp.xcodeproj */;
+				},
+				{
+					ProductGroup = 6C726E772EC9CDB000DDA131 /* Products */;
+					ProjectRef = 6C726E762EC9CDB000DDA131 /* TryAngleApp.xcodeproj */;
+				},
+				{
+					ProductGroup = 6CE410482ECD72FA003DE68C /* Products */;
+					ProjectRef = 6CE410442ECD72FA003DE68C /* TryAngleApp.xcodeproj */;
+				},
+				{
+					ProductGroup = 6CE4143A2ECF8483003DE68C /* Products */;
+					ProjectRef = 6CE414362ECF8483003DE68C /* TryAngleApp.xcodeproj */;
+				},
+				{
+					ProductGroup = 6CD9B7222ECCB1AF00CC618D /* Products */;
+					ProjectRef = 6CD9B7202ECCB1AF00CC618D /* TryAngleApp.xcodeproj */;
+				},
+				{
+					ProductGroup = 6C9C7EA12EEA045A009AE037 /* Products */;
+					ProjectRef = 6C9C7E9F2EEA045A009AE037 /* TryAngleApp.xcodeproj */;
+				},
+				{
+					ProductGroup = 6CE414962ECF8502003DE68C /* Products */;
+					ProjectRef = 6CE414922ECF8502003DE68C /* TryAngleApp.xcodeproj */;
+				},
+				{
+					ProductGroup = 6CD9B77C2ECD559F00CC618D /* Products */;
+					ProjectRef = 6CD9B77A2ECD559F00CC618D /* TryAngleApp.xcodeproj */;
+				},
+				{
+					ProductGroup = 6CC70AA12EE95675006BD56B /* Products */;
+					ProjectRef = 6CC70A9F2EE95675006BD56B /* TryAngleApp.xcodeproj */;
 				},
 				{
 					ProductGroup = 6CEB45F52ECC7B8900809755 /* Products */;
@@ -377,24 +425,12 @@
 					ProjectRef = 6CEB453F2EC9E4BF00809755 /* TryAngleApp.xcodeproj */;
 				},
 				{
-					ProductGroup = 6CE412102ECF58F4003DE68C /* Products */;
-					ProjectRef = 6CE4120C2ECF58F4003DE68C /* TryAngleApp.xcodeproj */;
-				},
-				{
 					ProductGroup = 6C9C87392EF514DB009AE037 /* Products */;
 					ProjectRef = 6C9C87372EF514DB009AE037 /* TryAngleApp.xcodeproj */;
 				},
 				{
 					ProductGroup = 6CEB46322ECC964900809755 /* Products */;
 					ProjectRef = 6CEB46312ECC964900809755 /* TryAngleApp.xcodeproj */;
-				},
-				{
-					ProductGroup = 6C05849D2EE323E60037603D /* Products */;
-					ProjectRef = 6C0584992EE323E60037603D /* TryAngleApp.xcodeproj */;
-				},
-				{
-					ProductGroup = 6C94E9812EE8379500504E61 /* Products */;
-					ProjectRef = 6C94E97F2EE8379500504E61 /* TryAngleApp.xcodeproj */;
 				},
 				{
 					ProductGroup = 6C0585A52EE3FCFB0037603D /* Products */;
@@ -405,32 +441,16 @@
 					ProjectRef = 6C0588F92EE517BB0037603D /* TryAngleApp.xcodeproj */;
 				},
 				{
-					ProductGroup = 6C726E772EC9CDB000DDA131 /* Products */;
-					ProjectRef = 6C726E762EC9CDB000DDA131 /* TryAngleApp.xcodeproj */;
-				},
-				{
-					ProductGroup = 6CE410482ECD72FA003DE68C /* Products */;
-					ProjectRef = 6CE410442ECD72FA003DE68C /* TryAngleApp.xcodeproj */;
-				},
-				{
 					ProductGroup = 6C97EE9F2EE943620023FCA1 /* Products */;
 					ProjectRef = 6C97EE9D2EE943620023FCA1 /* TryAngleApp.xcodeproj */;
 				},
 				{
+					ProductGroup = 6C5E58342F1FD41900BFB65D /* Products */;
+					ProjectRef = 6C5E58322F1FD41900BFB65D /* TryAngleApp.xcodeproj */;
+				},
+				{
 					ProductGroup = 6C9C82C42EEAD58E009AE037 /* Products */;
 					ProjectRef = 6C9C82C22EEAD58E009AE037 /* TryAngleApp.xcodeproj */;
-				},
-				{
-					ProductGroup = 6CE4143A2ECF8483003DE68C /* Products */;
-					ProjectRef = 6CE414362ECF8483003DE68C /* TryAngleApp.xcodeproj */;
-				},
-				{
-					ProductGroup = 6CD9B7222ECCB1AF00CC618D /* Products */;
-					ProjectRef = 6CD9B7202ECCB1AF00CC618D /* TryAngleApp.xcodeproj */;
-				},
-				{
-					ProductGroup = 6C9C7EA12EEA045A009AE037 /* Products */;
-					ProjectRef = 6C9C7E9F2EEA045A009AE037 /* TryAngleApp.xcodeproj */;
 				},
 				{
 					ProductGroup = 6C9C84FC2EEB1F94009AE037 /* Products */;
@@ -628,7 +648,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = DQ4WG8XD63;
+				DEVELOPMENT_TEAM = UMWT9FUR53;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -647,7 +667,7 @@
 				MARKETING_VERSION = 1.0;
 				NEW_SETTING = "";
 				OTHER_LDFLAGS = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = com.tryangle.TryAngleApp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tryangle.TryAngleAppteam;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -670,7 +690,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = DQ4WG8XD63;
+				DEVELOPMENT_TEAM = UMWT9FUR53;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -689,7 +709,7 @@
 				MARKETING_VERSION = 1.0;
 				NEW_SETTING = "";
 				OTHER_LDFLAGS = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = com.tryangle.TryAngleApp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tryangle.TryAngleAppteam;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

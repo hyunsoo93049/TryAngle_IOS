@@ -54,18 +54,22 @@ class ReferenceAnalyzer {
             CompositionModule()  // priority 20: 구도 타입
         ])
 
-        // Pipeline 모듈 초기화
-        Task {
-            await initializePipeline()
-        }
+        // 🔧 FIX: Pipeline 모듈 즉시 초기화 (비동기 제거 - race condition 방지)
+        // analyze()가 호출되기 전에 poseDetector가 설정되어야 함
+        initializePipelineSync()
     }
 
-    private func initializePipeline() async {
+    /// 🔧 동기식 파이프라인 초기화 (race condition 방지)
+    private func initializePipelineSync() {
         // 🔥 싱글톤 사용 (메모리 절약 - 새 인스턴스 생성하면 모델이 중복 로드됨!)
         let poseService = RTMPoseService.shared
         let depthService = DepthService.shared
 
-        pipeline.register(pose: poseService, depth: depthService, segmentation: nil, composition: nil)
+        // 동기적으로 등록 (모델 초기화는 각 서비스에서 이미 처리됨)
+        pipeline.poseDetector = poseService
+        pipeline.depthEstimator = depthService
+
+        print("✅ ReferenceAnalyzer: Pipeline 즉시 초기화 완료 (poseDetector: \(pipeline.poseDetector != nil), depthEstimator: \(pipeline.depthEstimator != nil))")
     }
 
     // MARK: - Analysis
@@ -131,12 +135,26 @@ class ReferenceAnalyzer {
 
         // Pose 분석
         if let poseDetector = pipeline.poseDetector {
+            if debugMode {
+                print("   🔍 Pose 분석 시작 (poseDetector: \(type(of: poseDetector)))")
+            }
             do {
                 context.poseResult = try await poseDetector.detect(input: frameInput)
+                if debugMode {
+                    if let pose = context.poseResult {
+                        print("   ✅ Pose 분석 성공: \(pose.keypoints.count)개 키포인트")
+                    } else {
+                        print("   ⚠️ Pose 분석 결과 nil (인물 미검출?)")
+                    }
+                }
             } catch {
                 if debugMode {
-                    print("   ⚠️ Pose 분석 실패: \(error.localizedDescription)")
+                    print("   ❌ Pose 분석 실패: \(error.localizedDescription)")
                 }
+            }
+        } else {
+            if debugMode {
+                print("   ❌ poseDetector가 nil입니다! (pipeline 초기화 실패)")
             }
         }
 

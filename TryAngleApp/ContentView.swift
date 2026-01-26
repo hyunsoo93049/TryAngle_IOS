@@ -10,7 +10,7 @@ struct ContentView: View {
     @Binding var referenceImageData: Data?  // 🆕 EXIF 추출용 원본 데이터
     var isActiveTab: Bool = true  // 현재 탭이 활성화 상태인지 (MainTabView에서 전달)
     @StateObject private var cameraManager = CameraManager()
-    @StateObject private var realtimeAnalyzer = RealtimeAnalyzer()  // 실시간 분석
+    @StateObject private var realtimeAnalyzer = AnalysisCoordinator()  // 실시간 분석 (리팩토링됨)
     @StateObject private var thermalManager = ThermalStateManager()  // 🔥 발열/배터리 관리
     @State private var feedbackItems: [FeedbackItem] = []
     @State private var serverFeedbackItems: [FeedbackItem] = []  // 서버 피드백 (포즈 등)
@@ -811,7 +811,7 @@ struct LensSelector: View {
 struct DebugOverlay: View {
     @ObservedObject var cameraManager: CameraManager
     @ObservedObject var thermalManager: ThermalStateManager
-    @ObservedObject var realtimeAnalyzer: RealtimeAnalyzer
+    @ObservedObject var realtimeAnalyzer: AnalysisCoordinator
     let referenceImage: UIImage?
     let thermalStateEmoji: (ProcessInfo.ThermalState) -> String
     let thermalColor: (ProcessInfo.ThermalState) -> Color
