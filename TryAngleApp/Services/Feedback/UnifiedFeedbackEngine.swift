@@ -13,6 +13,9 @@ final class UnifiedFeedbackEngine {
     // MARK: - Singleton
     static let shared = UnifiedFeedbackEngine()
 
+    // MARK: - Pose Comparator (133개 키포인트 비교)
+    private let poseComparator = AdaptivePoseComparator()
+
     // MARK: - Configuration
     struct Config {
         var aspectRatioTolerance: CGFloat = 0.0   // 비율은 정확히 일치
@@ -353,14 +356,26 @@ final class UnifiedFeedbackEngine {
             }
         }
 
-        // Stage 5: 포즈 체크
-        if let refKps = referenceKeypoints, refKps.count >= 17, currentKeypoints.count >= 17 {
-            let poseSimilarity = calculatePoseSimilarity(current: currentKeypoints, reference: refKps)
+        // Stage 5: 포즈 체크 (133개 키포인트 정밀 비교)
+        if let refKps = referenceKeypoints, !refKps.isEmpty, !currentKeypoints.isEmpty {
+            // PoseKeypoint → (CGPoint, Float) 튜플로 변환
+            let refTuples = refKps.map { (point: $0.location, confidence: $0.confidence) }
+            let curTuples = currentKeypoints.map { (point: $0.location, confidence: $0.confidence) }
+
+            let comparison = poseComparator.comparePoses(
+                referenceKeypoints: refTuples,
+                currentKeypoints: curTuples
+            )
+
+            let poseSimilarity = CGFloat(comparison.overallAccuracy)
 
             if poseSimilarity < config.poseThreshold {
+                // 구체적인 피드백 생성 (angleDirections에서 첫 번째 피드백 사용)
+                let specificFeedback = comparison.angleDirections.values.first ?? ""
+
                 return SimpleGuideResult(
                     guide: .adjustPose,
-                    magnitude: "",
+                    magnitude: specificFeedback,
                     progress: 0.90,
                     debugInfo: "포즈 유사도: \(String(format: "%.0f", poseSimilarity * 100))%",
                     shotTypeMatch: true,
@@ -457,14 +472,30 @@ final class UnifiedFeedbackEngine {
             category: "compression"
         )
 
-        // Gate 4: 포즈
+        // Gate 4: 포즈 (133개 키포인트 정밀 비교)
         var poseScore: CGFloat = 1.0
         var poseFeedback = ""
-        if let refKps = referenceKeypoints, refKps.count >= 17, currentKeypoints.count >= 17 {
-            poseScore = calculatePoseSimilarity(current: currentKeypoints, reference: refKps)
+        var poseDebugInfo = ""
+        if let refKps = referenceKeypoints, !refKps.isEmpty, !currentKeypoints.isEmpty {
+            // PoseKeypoint → (CGPoint, Float) 튜플로 변환
+            let refTuples = refKps.map { (point: $0.location, confidence: $0.confidence) }
+            let curTuples = currentKeypoints.map { (point: $0.location, confidence: $0.confidence) }
+
+            let comparison = poseComparator.comparePoses(
+                referenceKeypoints: refTuples,
+                currentKeypoints: curTuples
+            )
+
+            poseScore = CGFloat(comparison.overallAccuracy)
+
             if poseScore < config.poseThreshold {
-                poseFeedback = "포즈를 조정하세요"
+                // 구체적인 피드백 (최대 2개)
+                let feedbacks = Array(comparison.angleDirections.values.prefix(2))
+                poseFeedback = feedbacks.isEmpty ? "포즈를 조정하세요" : feedbacks.joined(separator: ", ")
             }
+
+            // 디버그 정보
+            poseDebugInfo = "Acc: \(Int(poseScore * 100))% | 비교 키포인트: \(comparison.comparableKeypoints.count)개"
         }
         let gate4 = GateResult(
             name: "포즈",
@@ -472,7 +503,8 @@ final class UnifiedFeedbackEngine {
             threshold: config.poseThreshold,
             feedback: poseFeedback,
             icon: "🤸",
-            category: "pose"
+            category: "pose",
+            debugInfo: poseDebugInfo
         )
 
         return GateEvaluation(
@@ -527,42 +559,6 @@ final class UnifiedFeedbackEngine {
         }
 
         return result
-    }
-
-    private func calculatePoseSimilarity(current: [PoseKeypoint], reference: [PoseKeypoint]) -> CGFloat {
-        let importantIndices = [0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
-
-        guard let curBBox = ShotTypeGate.calculateKeypointBBox(current),
-              let refBBox = ShotTypeGate.calculateKeypointBBox(reference) else {
-            return 0.5
-        }
-
-        var totalScore: CGFloat = 0
-        var validCount: CGFloat = 0
-
-        for idx in importantIndices {
-            guard idx < current.count, idx < reference.count else { continue }
-
-            let curKp = current[idx]
-            let refKp = reference[idx]
-
-            if curKp.confidence < 0.3 || refKp.confidence < 0.3 { continue }
-
-            let curRelX = (curKp.location.x - curBBox.minX) / max(curBBox.width, 0.01)
-            let curRelY = (curKp.location.y - curBBox.minY) / max(curBBox.height, 0.01)
-
-            let refRelX = (refKp.location.x - refBBox.minX) / max(refBBox.width, 0.01)
-            let refRelY = (refKp.location.y - refBBox.minY) / max(refBBox.height, 0.01)
-
-            let distance = sqrt(pow(curRelX - refRelX, 2) + pow(curRelY - refRelY, 2))
-            let score = max(0, 1.0 - distance * 2)
-
-            totalScore += score
-            validCount += 1
-        }
-
-        guard validCount > 0 else { return 0.5 }
-        return totalScore / validCount
     }
 
     private func getMagnitude(diff: CGFloat) -> String {
