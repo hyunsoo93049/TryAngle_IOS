@@ -40,10 +40,12 @@ class RTMPoseRunner {
         isInitializing = true
 
         initQueue.async {
-            print("🚀 RTMPoseRunner 백그라운드 초기화 시작")
+            
+            
+            logInfo("초기화 시작", category:"RTMPose")
             _shared = RTMPoseRunner()
             isInitializing = false
-            print("✅ RTMPoseRunner 백그라운드 초기화 완료")
+            logInfo("초기화 완료", category:"RTMPose")
 
             DispatchQueue.main.async {
                 completion?()
@@ -67,24 +69,21 @@ class RTMPoseRunner {
 
     private init?() {
         // 🔥 이 init은 백그라운드 스레드에서만 호출됨
-        print("🚀 RTMPoseRunner init() 시작 (백그라운드)")
-
+        logInfo("모델 로드 완료", category : "RTMPose")
+        
         // RTMPose ONNX 모델 (포즈 추정)
         // 🔧 수정: Bundle(for:) 사용하여 올바른 번들에서 찾기
         let poseURL: URL? = Bundle(for: RTMPoseRunner.self).url(forResource: "rtmpose_int8", withExtension: "onnx")
             ?? Bundle.main.url(forResource: "rtmpose_int8", withExtension: "onnx")
 
         guard let poseURL = poseURL else {
-            print("❌ rtmpose_int8.onnx 파일을 찾을 수 없습니다")
-            print("   Bundle(for:) 경로: \(Bundle(for: RTMPoseRunner.self).bundlePath)")
-            print("   Bundle.main 경로: \(Bundle.main.bundlePath)")
+            logError("모델 로드 실패 - error : rtmpose_int8.onnx 파일 없음", category: "RTMPose")
             return nil
         }
 
         poseModelPath = poseURL.path
 
-        print("✅ 모델 경로 확인:")
-        print("   Pose (RTMPose ONNX): \(poseModelPath)")
+        
 
         // 🔧 수정: Xcode 자동 생성 YOLO11nDetector 클래스 사용
         setupCoreMLDetector()
@@ -94,13 +93,14 @@ class RTMPoseRunner {
     }
 
     deinit {
-        print("🗑️ RTMPoseRunner deinit")
+        logDebug("deinit - RTMPoseRunner 메모리 해제 - init반환", category: "RTMPose")
     }
 
     // MARK: - CoreML Detector 초기화 (YOLO11n)
     // 🔧 수정: Xcode 자동 생성 클래스 사용 (Bundle 경로 문제 해결)
     private func setupCoreMLDetector() {
-        print("🔧 YOLO11n CoreML 초기화 시작...")
+
+        logInfo("YOLO11n CoreML 초기화 시작", category: "YOLO11n")
         logMemory("YOLO11n 로드 전")
 
         do {
@@ -110,33 +110,33 @@ class RTMPoseRunner {
 
             let yolo = try YOLO11nDetector(configuration: config)
             yoloModel = try VNCoreMLModel(for: yolo.model)
-            print("✅ YOLO11n CoreML 로드 성공 (Neural Engine 가속)")
+            logInfo("Yolo11n 로드 성공")
             logMemory("YOLO11n 로드 후")
         } catch {
-            print("❌ YOLO11n CoreML 로드 실패: \(error)")
-            print("   원인: \(error.localizedDescription)")
+            logError("YOLO11n 로드 실패 - error: \(error.localizedDescription)", category: "YOLO11n")
+            logDebug("YOLO11n 상세 에러 - \(error)", category: "YOLO11n")
             yoloModel = nil
         }
     }
 
     // MARK: - ONNX Runtime 초기화 (RTMPose만)
     private func setupONNXRuntime() {
-        print("🔧 ONNX Runtime 초기화 시작 (RTMPose)...")
+        logInfo("ONNX Runtime 초기화 시작", category: "RTMPose")
 
         do {
             // 1. Environment 생성
             env = try ORTEnv(loggingLevel: ORTLoggingLevel.warning)
-            print("✅ Environment 생성 성공")
+            logDebug("Environment 생성 성공", category: "RTMPose")
 
             // 2. RTMPose용 Session Options (CoreML GPU 가속)
             let poseOptions = try ORTSessionOptions()
 
-            // 🔥 CoreML Execution Provider 활성화 (GPU 가속)
+            // CoreML Execution Provider 활성화 (GPU 가속)
             do {
                 try poseOptions.appendCoreMLExecutionProvider()
-                print("✅ RTMPose: CoreML GPU 가속 활성화")
+                logInfo("RTMPose CoreML GPU 가속 활성화", category: "RTMPose")
             } catch {
-                print("⚠️ RTMPose CoreML 활성화 실패, CPU 폴백: \(error)")
+                logWarning("RTMPose CoreML 활성화 실패, CPU 폴백 - error: \(error.localizedDescription)", category: "RTMPose")
             }
 
             // 병렬 처리 설정 (최대 성능)
@@ -146,15 +146,16 @@ class RTMPoseRunner {
             // 3. RTMPose 세션 생성
             logMemory("RTMPose 로드 전")
 
-            print("📦 Pose 모델 로딩 중... (\(poseModelPath))")
+            logDebug("RTMPose 모델 로딩 중 - path: \(poseModelPath)", category: "RTMPose")
             poseSession = try ORTSession(env: env!, modelPath: poseModelPath, sessionOptions: poseOptions)
-            print("✅ RTMPose 로드 성공 (CoreML GPU)")
+            logInfo("RTMPose 로드 성공 - accelerator: CoreML GPU", category: "RTMPose")
             logMemory("RTMPose 로드 후")
 
-            print("🔧 ONNX Runtime 초기화 완료")
+            logInfo("ONNX Runtime 초기화 완료", category: "RTMPose")
 
         } catch {
-            print("❌ ONNX Runtime 초기화 실패: \(error)")
+            logError("ONNX Runtime 초기화 실패 - error: \(error.localizedDescription)", category: "RTMPose")
+            logDebug("RTMPose 상세 에러 - \(error)", category: "RTMPose")
             env = nil
             poseSession = nil
         }
@@ -163,7 +164,7 @@ class RTMPoseRunner {
     // MARK: - YOLO11n CoreML로 사람 검출 (BBox만 필요할 때)
     func detectPersonBBox(from image: UIImage) -> CGRect? {
         guard let yoloModel = yoloModel else {
-            print("❌ YOLO11n CoreML 모델이 초기화되지 않음")
+            logError("YOLO11n 추론 실패 - error: 모델 초기화되지 않음", category: "YOLO11n")
             return nil
         }
 
@@ -173,7 +174,7 @@ class RTMPoseRunner {
     // MARK: - YOLO11n CoreML로 모든 사람 검출 (멀티 person)
     func detectAllPersonBBoxes(from image: UIImage) -> [CGRect] {
         guard let yoloModel = yoloModel else {
-            print("❌ YOLO11n CoreML 모델이 초기화되지 않음")
+            logError("YOLO11n 추론 실패 - error: 모델 초기화되지 않음", category: "YOLO11n")
             return []
         }
 
@@ -190,26 +191,25 @@ class RTMPoseRunner {
         guard let yoloModel = yoloModel,
               let poseSession = poseSession,
               let env = env else {
-            print("❌ RTMPose 세션이 초기화되지 않음")
+            logError("RTMPose 추론 실패 - error: 세션 초기화되지 않음", category: "RTMPose")
             return nil
         }
 
         // 1. YOLO11n CoreML로 사람 검출
         guard let detectedBox = detectPersonWithCoreML(from: image, model: yoloModel) else {
-            // 🔧 수정: 사람 검출 실패 시 RTMPose 실행 안 함
-            print("⚠️ YOLO11n: 사람 검출 안됨 → 포즈 추정 건너뜀")
+            logWarning("YOLO11n 사람 검출 안됨 - 포즈 추정 건너뜀", category: "YOLO11n")
             return nil
         }
 
-        print("✅ YOLO11n: 사람 검출 성공 - \(detectedBox)")
+        logDebug("YOLO11n 사람 검출 성공 - boundingBox: \(detectedBox)", category: "YOLO11n")
 
         // 2. 검출된 영역으로 포즈 추정
         let keypoints = estimatePose(from: image, boundingBox: detectedBox, using: poseSession, env: env)
 
         if let keypoints = keypoints {
-            print("✅ RTMPose: \(keypoints.count)개 키포인트 검출 성공")
+            logDebug("RTMPose 추론 성공 - keypoints: \(keypoints.count)", category: "RTMPose")
         } else {
-            print("❌ RTMPose: 포즈 추정 실패")
+            logError("RTMPose 추론 실패", category: "RTMPose")
         }
 
         return keypoints.map { RTMPoseResult(keypoints: $0, boundingBox: detectedBox) }
@@ -232,14 +232,14 @@ class RTMPoseRunner {
             autoreleasepool {
                 let request = VNCoreMLRequest(model: model) { request, error in
                     if let error = error {
-                        print("❌ YOLO11n 추론 오류: \(error)")
+                        logError("YOLO11n 추론 실패 - error: \(error.localizedDescription)", category: "YOLO11n")
                         semaphore.signal()
                         return
                     }
 
                     // VNRecognizedObjectObservation으로 결과 파싱
                     guard let results = request.results as? [VNRecognizedObjectObservation] else {
-                        print("⚠️ YOLO11n: 결과 형식 불일치")
+                        logWarning("YOLO11n 결과 형식 불일치", category: "YOLO11n")
                         semaphore.signal()
                         return
                     }
@@ -275,7 +275,7 @@ class RTMPoseRunner {
                 do {
                     try handler.perform([request])
                 } catch {
-                    print("❌ YOLO11n Vision 실행 오류: \(error)")
+                    logError("YOLO11n Vision 실행 실패 - error: \(error.localizedDescription)", category: "YOLO11n")
                     semaphore.signal()
                 }
             }
@@ -296,11 +296,11 @@ class RTMPoseRunner {
 
         // 백그라운드 스레드에서 Vision 요청 실행
         Self.visionQueue.async {
-            // 🔥 메모리 누수 방지: Vision 요청 객체 즉시 해제
+            // 메모리 누수 방지: Vision 요청 객체 즉시 해제
             autoreleasepool {
                 let request = VNCoreMLRequest(model: model) { request, error in
                     if let error = error {
-                        print("❌ YOLO11n 추론 오류: \(error)")
+                        logError("YOLO11n 추론 실패 - error: \(error.localizedDescription)", category: "YOLO11n")
                         semaphore.signal()
                         return
                     }
@@ -335,7 +335,7 @@ class RTMPoseRunner {
                 do {
                     try handler.perform([request])
                 } catch {
-                    print("❌ YOLO11n Vision 실행 오류: \(error)")
+                    logError("YOLO11n Vision 실행 실패 - error: \(error.localizedDescription)", category: "YOLO11n")
                     semaphore.signal()
                 }
             }
@@ -377,7 +377,7 @@ class RTMPoseRunner {
 
             guard let simccX = outputs["simcc_x"],
                   let simccY = outputs["simcc_y"] else {
-                print("❌ RTMPose 출력(SimCC)을 찾을 수 없음")
+                logError("RTMPose 추론 실패 - error: SimCC 출력 없음", category: "RTMPose")
                 return nil
             }
 
@@ -386,7 +386,8 @@ class RTMPoseRunner {
             return parseRTMPoseSimCCOutput(simccX: simccX, simccY: simccY, boundingBox: boundingBox, imageSize: imageSize)
 
         } catch {
-            print("❌ RTMPose 추론 오류: \(error)")
+            logError("RTMPose 추론 실패 - error: \(error.localizedDescription)", category: "RTMPose")
+            logDebug("RTMPose 상세 에러 - \(error)", category: "RTMPose")
             return nil
         }
     }
@@ -499,7 +500,7 @@ class RTMPoseRunner {
         let yBins = yShape[2].intValue  // 512
 
         if numKeypoints != 133 {
-            print("⚠️ 예상치 못한 키포인트 수: \(numKeypoints)")
+            logWarning("RTMPose 키포인트 수 불일치 - expected: 133 | actual: \(numKeypoints)", category: "RTMPose")
             return nil
         }
 
@@ -548,13 +549,13 @@ class RTMPoseRunner {
 
             keypoints.append((point: point, confidence: confidence))
 
-            // 🔍 손 키포인트 디버그 (91-132번)
+            // 손 키포인트 디버그 (91-132번)
             if i >= 91 && i <= 132 {
                 if confidence < 0.3 {
                     let handName = i <= 111 ? "왼손" : "오른손"
                     let keypointIndex = i <= 111 ? i - 91 : i - 112
                     if keypointIndex % 5 == 0 {  // 5개마다 한 번만 로그
-                        print("⚠️ \(handName) 키포인트 \(keypointIndex): 신뢰도 낮음 (\(String(format: "%.2f", confidence)))")
+                        logDebug("RTMPose \(handName) 키포인트 신뢰도 낮음 - index: \(keypointIndex) | confidence: \(String(format: "%.2f", confidence))", category: "RTMPose")
                     }
                 }
             }
@@ -568,9 +569,9 @@ class RTMPoseRunner {
         let rightHandAvg = rightHandConfidences.reduce(0, +) / Float(rightHandConfidences.count)
 
         if leftHandAvg < 0.5 || rightHandAvg < 0.5 {
-            print("📊 손 인식 평균 신뢰도 - 왼손: \(String(format: "%.2f", leftHandAvg)), 오른손: \(String(format: "%.2f", rightHandAvg))")
+            logDebug("RTMPose 손 인식 평균 신뢰도 - leftHand: \(String(format: "%.2f", leftHandAvg)) | rightHand: \(String(format: "%.2f", rightHandAvg))", category: "RTMPose")
             if leftHandAvg < 0.3 || rightHandAvg < 0.3 {
-                print("💡 손이 화면에서 잘렸거나 가려졌을 수 있습니다. 전체 신체가 프레임 안에 들어오도록 조정해보세요.")
+                logWarning("RTMPose 손 인식 신뢰도 매우 낮음 - 손이 프레임 밖이거나 가려짐", category: "RTMPose")
             }
         }
 

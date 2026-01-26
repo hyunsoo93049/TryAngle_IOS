@@ -12,6 +12,7 @@
 
 /* Begin PBXFileReference section */
 		57C13229136A9EB5A4274A2B /* Pods-TryAngleApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TryAngleApp.release.xcconfig"; path = "Target Support Files/Pods-TryAngleApp/Pods-TryAngleApp.release.xcconfig"; sourceTree = "<group>"; };
+		6C052A412F2796A4005603C3 /* TryAngleApp.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = TryAngleApp.xcodeproj; sourceTree = "<group>"; };
 		6C0584992EE323E60037603D /* TryAngleApp.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = TryAngleApp.xcodeproj; sourceTree = "<group>"; };
 		6C0585A12EE3FCFB0037603D /* TryAngleApp.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = TryAngleApp.xcodeproj; sourceTree = "<group>"; };
 		6C0588182EE512220037603D /* TryAngleApp.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = TryAngleApp.xcodeproj; sourceTree = "<group>"; };
@@ -75,6 +76,11 @@
 				D35E682477250C51A7029D68 /* Pods_TryAngleApp.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		6C052A432F2796A4005603C3 /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
 			sourceTree = "<group>";
 		};
 		6C05849D2EE323E60037603D /* Products */ = {
@@ -443,6 +449,10 @@
 				{
 					ProductGroup = 6C97EE9F2EE943620023FCA1 /* Products */;
 					ProjectRef = 6C97EE9D2EE943620023FCA1 /* TryAngleApp.xcodeproj */;
+				},
+				{
+					ProductGroup = 6C052A432F2796A4005603C3 /* Products */;
+					ProjectRef = 6C052A412F2796A4005603C3 /* TryAngleApp.xcodeproj */;
 				},
 				{
 					ProductGroup = 6C5E58342F1FD41900BFB65D /* Products */;
