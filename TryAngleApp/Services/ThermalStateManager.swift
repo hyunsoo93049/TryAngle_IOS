@@ -3,6 +3,8 @@ import UIKit
 import Combine
 
 // MARK: - 발열 및 배터리 관리자
+// ⚠️ DEPRECATED: SystemMonitor를 사용하세요
+@available(*, deprecated, message: "Use SystemMonitor instead")
 class ThermalStateManager: ObservableObject {
 
     @Published var currentThermalState: ProcessInfo.ThermalState = .nominal
@@ -58,7 +60,8 @@ class ThermalStateManager: ObservableObject {
         DispatchQueue.main.async {
             self.isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
             self.updateRecommendedInterval()
-            print("🔋 저전력 모드: \(self.isLowPowerMode ? "ON" : "OFF")")
+            let status = self.isLowPowerMode ? "ON" : "OFF"
+            AppLogger.shared.info("🔋 저전력 모드: \(status)", category: "System")
         }
     }
 
@@ -130,7 +133,8 @@ class ThermalStateManager: ObservableObject {
             stateName = "알 수 없음"
         }
 
-        print("\(stateEmoji) 발열 상태: \(stateName) → 권장 간격: \(Int(recommendedAnalysisInterval * 1000))ms")
+        let message = "\(stateEmoji) 발열 상태: \(stateName) → 권장 간격: \(Int(recommendedAnalysisInterval * 1000))ms"
+        AppLogger.shared.info(message, category: "System")
     }
 
     // MARK: - 분석 실행 가능 여부

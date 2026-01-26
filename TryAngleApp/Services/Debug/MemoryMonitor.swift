@@ -1,8 +1,10 @@
 import Foundation
 
 // MARK: - Memory Monitor
+// ⚠️ DEPRECATED: SystemMonitor를 사용하세요
 // 역할: 앱의 메모리 사용량을 측정하고 로깅합니다.
 
+@available(*, deprecated, message: "Use SystemMonitor instead")
 class MemoryMonitor {
 
     static let shared = MemoryMonitor()
@@ -28,27 +30,25 @@ class MemoryMonitor {
 
     /// 메모리 사용량 로깅
     func logMemory(tag: String) {
-        let usage = currentMemoryUsage()
-        print("📊 [\(tag)] 메모리: \(String(format: "%.1f", usage)) MB")
+        // Redirect to SystemMonitor
+        SystemMonitor.shared.logSystemStats(tag: tag)
     }
 
     /// 메모리 경고 체크 (임계값 초과 시 경고)
     func checkMemoryWarning(threshold: Double = 500) {
-        let usage = currentMemoryUsage()
-        if usage > threshold {
-            print("⚠️🔴 메모리 경고! 현재: \(String(format: "%.1f", usage)) MB (임계값: \(threshold) MB)")
-        }
+        SystemMonitor.shared.checkMemoryWarning(threshold: threshold)
     }
 
     /// 주요 컴포넌트별 메모리 체크 (앱 시작 시 호출)
     func logInitialMemoryBreakdown() {
-        print("========== 메모리 사용량 분석 ==========")
-        logMemory(tag: "현재 총 사용량")
-        print("=========================================")
+        AppLogger.shared.info("========== 시스템 사용량 분석 ==========", category: "System")
+        SystemMonitor.shared.logSystemStats(tag: "초기 상태")
+        AppLogger.shared.info("=========================================", category: "System")
     }
 }
 
 // MARK: - 편의 함수
+@available(*, deprecated, message: "Use SystemMonitor.shared.logSystemStats() instead")
 func logMemory(_ tag: String) {
-    MemoryMonitor.shared.logMemory(tag: tag)
+    SystemMonitor.shared.logSystemStats(tag: tag)
 }
