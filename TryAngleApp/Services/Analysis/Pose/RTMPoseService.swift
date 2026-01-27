@@ -21,12 +21,16 @@ public class RTMPoseService: PoseDetector {
 
     public func initialize() async throws {
         // 싱글톤이므로 별도 초기화 불필요 (앱 시작 시 이미 초기화됨)
-        print("🚀 RTMPoseService initializing (using shared RTMPoseRunner)...")
+        
+        logInfo("RTMPoseService 초기화 시작 (shared RTMPoseRunner 사용)", category: "RTMPose")
 
         guard runner != nil else {
+            //rtmpose service 초기화 실패 시
+            logError("RTMPoseService 초기화 실패 - RTMPoseRunner.shared is nil", category: "RTMPose")
             throw NSError(domain: "RTMPoseService", code: -1, userInfo: [NSLocalizedDescriptionKey: "RTMPoseRunner.shared is nil"])
         }
-        print("✅ RTMPoseService initialized successfully (shared runner).")
+        
+        logInfo("RTMPoseService 초기화 완료", category: "RTMPose")
     }
     
     public func detect(input: FrameInput) async throws -> PoseDetectionResult? {

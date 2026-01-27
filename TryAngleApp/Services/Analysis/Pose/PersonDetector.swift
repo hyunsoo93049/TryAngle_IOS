@@ -1,7 +1,7 @@
 // PersonDetector.swift
 // 사람 검출 - YOLOX 전용 (RTMPoseRunner 재사용)
 // 작성일: 2025-12-05
-// 수정일: 2025-12-10 - Vision Framework 제거, YOLOX 전용
+// 수정일: 2026-01-27 - Vision Framework 제거, YOLOX 전용
 
 import CoreML
 import CoreImage
@@ -18,18 +18,19 @@ class PersonDetector {
     // MARK: - Initialization
     init(rtmPoseRunner: RTMPoseRunner? = nil) {
         self.rtmPoseRunner = rtmPoseRunner
-        print("✅ PersonDetector 초기화 (YOLOX 전용)")
+        logInfo("PersonDetector 초기화 | model : Yolo11n", category: "AI")
+        
     }
 
     // RTMPoseRunner 연결 (나중에 설정)
     func setRTMPoseRunner(_ runner: RTMPoseRunner) {
         self.rtmPoseRunner = runner
-        print("✅ PersonDetector: RTMPoseRunner 연결됨 (YOLOX 사용 가능)")
+        logInfo("PersonDectector : RTMPoseRunner 연결됨 | model : Yolo11n", category:"AI")
     }
 
     // MARK: - Person Detection
     func detectPerson(in image: CIImage, completion: @escaping (CGRect?) -> Void) {
-        // YOLOX 전용
+        // YOLO11n 전용
         guard let runner = rtmPoseRunner, runner.isReady else {
             print("⚠️ PersonDetector: RTMPoseRunner not ready")
             completion(nil)
