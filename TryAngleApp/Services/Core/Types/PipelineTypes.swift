@@ -2,6 +2,33 @@ import Foundation
 import CoreGraphics
 import UIKit
 import AVFoundation
+import Vision
+
+// MARK: - 얼굴 분석 결과
+struct FaceAnalysisResult {
+    let faceRect: CGRect
+    let landmarks: VNFaceLandmarks2D?
+    let yaw: Float?
+    let pitch: Float?
+    let roll: Float?
+    let observation: VNFaceObservation?
+}
+
+// MARK: - 포즈 분석 결과
+struct PoseAnalysisResult {
+    let keypoints: [(point: CGPoint, confidence: Float)]
+    let observation: VNHumanBodyPoseObservation?
+
+    init(observation: VNHumanBodyPoseObservation, keypoints: [(point: CGPoint, confidence: Float)]) {
+        self.observation = observation
+        self.keypoints = keypoints
+    }
+
+    init(keypoints: [(point: CGPoint, confidence: Float)]) {
+        self.observation = nil
+        self.keypoints = keypoints
+    }
+}
 
 // MARK: - Pipeline Data Types
 
