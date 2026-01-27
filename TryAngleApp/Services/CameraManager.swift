@@ -27,6 +27,11 @@ class CameraManager: NSObject, ObservableObject {
     @Published var virtualZoom: CGFloat = 1.0  // 사용자에게 표시되는 줌 (0.5, 1, 2, 3 등)
     @Published var aspectRatio: CameraAspectRatio = .ratio4_3
     @Published var isFrontCamera: Bool = false
+
+    // MARK: - Camera Settings (영구 저장)
+    @Published var cameraSettings: CameraFormatSettings = .default
+    private var cachedFrontFormat: AVCaptureDevice.Format?
+    private var cachedBackFormat: AVCaptureDevice.Format?
     
     // 🆕 Frame Stream for Analysis (Background Thread)
     public let frameSubject = PassthroughSubject<CMSampleBuffer, Never>()
@@ -110,6 +115,9 @@ class CameraManager: NSObject, ObservableObject {
             return
         }
 
+        // 카메라 설정 로드 (메인 스레드에서)
+        loadCameraFormatSettings()
+
         // 🔥 UI 반응성 개선: 백그라운드에서 초기화 (Safe Queue 사용)
         sessionQueue.async { [weak self] in
             guard let self = self else {
@@ -176,6 +184,9 @@ class CameraManager: NSObject, ObservableObject {
                 connection.videoRotationAngle = 90
                 connection.isVideoMirrored = (camera.position == .front)
             }
+
+            // 손떨림 보정 적용
+            applyStabilizationToConnection()
         } catch {
             print("❌ Session configuration failed: \(error)")
         }
@@ -530,89 +541,199 @@ class CameraManager: NSObject, ObservableObject {
         return AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back)
     }
 
+    // MARK: - Settings Initialization
+    /// 앱 시작 시 저장된 설정 로드 또는 첫 실행 시 기본값 호환 확인
+    func loadCameraFormatSettings() {
+        if let saved = CameraFormatSettings.load() {
+            // 이후 실행: 저장된 설정 바로 사용
+            cameraSettings = saved
+            logInfo("[CameraFormatSettings] 저장된 설정 로드: front=\(saved.frontResolution)MP, back=\(saved.backResolution)MP, fps=\(saved.fps)", category: "Camera")
+        } else {
+            // 첫 실행: 기본값 호환 확인 후 저장
+            var settings = CameraFormatSettings.default
+            validateAndAdjustSettings(&settings)
+            settings.save()
+            cameraSettings = settings
+            logInfo("[CameraFormatSettings] 첫 실행 - 호환 확인 후 저장: front=\(settings.frontResolution)MP, back=\(settings.backResolution)MP", category: "Camera")
+        }
+    }
+
+    /// 기본값이 기기에서 호환되는지 확인, 안 되면 가장 가까운 값으로 대체
+    private func validateAndAdjustSettings(_ settings: inout CameraFormatSettings) {
+        let frontResolutions = CameraFormatSettings.availableResolutions(for: .front)
+        let backResolutions = CameraFormatSettings.availableResolutions(for: .back)
+
+        if !frontResolutions.contains(settings.frontResolution) {
+            let closest = frontResolutions.min(by: { abs($0 - settings.frontResolution) < abs($1 - settings.frontResolution) })
+            if let closest = closest {
+                logWarning("[CameraFormatSettings] 전면 \(settings.frontResolution)MP 미지원 -> \(closest)MP로 대체", category: "Camera")
+                settings.frontResolution = closest
+            }
+        }
+
+        if !backResolutions.contains(settings.backResolution) {
+            let closest = backResolutions.min(by: { abs($0 - settings.backResolution) < abs($1 - settings.backResolution) })
+            if let closest = closest {
+                logWarning("[CameraFormatSettings] 후면 \(settings.backResolution)MP 미지원 -> \(closest)MP로 대체", category: "Camera")
+                settings.backResolution = closest
+            }
+        }
+    }
+
+    /// 설정 변경 시 호출 (SettingsSheet에서)
+    func applySettings(_ newSettings: CameraFormatSettings) {
+        let oldSettings = cameraSettings
+        cameraSettings = newSettings
+        newSettings.save()
+
+        // 캐시 무효화
+        cachedFrontFormat = nil
+        cachedBackFormat = nil
+
+        // 현재 카메라에 즉시 적용
+        sessionQueue.async { [weak self] in
+            guard let self = self, let device = self.currentCamera else { return }
+            self.applyFormatToDevice(device)
+        }
+
+        logInfo("[CameraFormatSettings] 설정 변경 적용", category: "Camera")
+    }
+
     // MARK: - Format Configuration
     private func configureHighQualityFormat(for device: AVCaptureDevice) {
+        // 캐시된 포맷이 있으면 즉시 적용 (카메라 전환 시 빠름)
+        let cachedFormat = (device.position == .front) ? cachedFrontFormat : cachedBackFormat
+        if let cached = cachedFormat, device.formats.contains(cached) {
+            applyFormat(cached, to: device)
+            logDebug("[Format] 캐시된 포맷 즉시 적용 (\(device.position == .front ? "전면" : "후면"))", category: "Camera")
+            return
+        }
+
+        // 캐시 없으면 설정에 맞는 포맷 탐색
+        applyFormatToDevice(device)
+    }
+
+    /// 저장된 설정에 맞는 최적 포맷을 찾아 적용
+    private func applyFormatToDevice(_ device: AVCaptureDevice) {
+        let targetMP = (device.position == .front)
+            ? cameraSettings.frontResolution
+            : cameraSettings.backResolution
+        let targetFPS = cameraSettings.fps
+        let targetPixels = CameraFormatSettings.megapixelsToPixelCount(targetMP)
+
         let formats = device.formats.filter { format in
             let dimensions = CMVideoFormatDescriptionGetDimensions(format.formatDescription)
             let mediaType = CMFormatDescriptionGetMediaSubType(format.formatDescription)
             let isVideoFormat = mediaType == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange ||
                                mediaType == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
-            // 720p 이상만 (너무 낮은 비디오 포맷 제외)
             guard isVideoFormat && dimensions.height >= 720 else { return false }
+
+            // FPS 지원 확인
+            let maxFPS = format.videoSupportedFrameRateRanges.map { $0.maxFrameRate }.max() ?? 0
+            guard maxFPS >= Double(targetFPS) - 1.0 else { return false }
+
             return true
         }
 
+        // 설정된 해상도(MP)에 가장 가까운 포맷 정렬
         let sortedFormats = formats.sorted { f1, f2 in
-            // 1. 🔥 사진 해상도 우선 (12MP 4032 vs 2MP 1920)
-            // supportedMaxPhotoDimensions가 비어있으면 0 취급
-            let w1 = f1.supportedMaxPhotoDimensions.last?.width ?? 0
-            let w2 = f2.supportedMaxPhotoDimensions.last?.width ?? 0
-            
-            // 유의미한 차이가 있다면 (예: 4000 vs 1920) 해상도 높은 것 우선
-            if abs(Int(w1) - Int(w2)) > 100 {
-                return w1 > w2
+            let photo1 = f1.supportedMaxPhotoDimensions.last
+            let photo2 = f2.supportedMaxPhotoDimensions.last
+            let p1 = Int(photo1?.width ?? 0) * Int(photo1?.height ?? 0)
+            let p2 = Int(photo2?.width ?? 0) * Int(photo2?.height ?? 0)
+
+            // 1. 목표 MP에 가장 가까운 사진 해상도
+            let diff1 = abs(p1 - targetPixels)
+            let diff2 = abs(p2 - targetPixels)
+            if abs(diff1 - diff2) > 500_000 {
+                return diff1 < diff2
             }
 
-            // 2. FPS 우선 (60fps)
-            let maxFPS1 = f1.videoSupportedFrameRateRanges.map { $0.maxFrameRate }.max() ?? 0
-            let maxFPS2 = f2.videoSupportedFrameRateRanges.map { $0.maxFrameRate }.max() ?? 0
-
-            // 60fps 지원 여부를 최우선
-            if maxFPS1 >= 59 && maxFPS2 < 59 { return true }
-            if maxFPS1 < 59 && maxFPS2 >= 59 { return false }
-            
-            // 3. 4:3 비율 우선 (센서 비율 매칭)
+            // 2. 4:3 비율 우선 (센서 비율 매칭)
             let d1 = CMVideoFormatDescriptionGetDimensions(f1.formatDescription)
             let d2 = CMVideoFormatDescriptionGetDimensions(f2.formatDescription)
             let r1 = Float(d1.width) / Float(d1.height)
             let r2 = Float(d2.width) / Float(d2.height)
-            
+
             let is43_1 = abs(r1 - 4.0/3.0) < 0.05
             let is43_2 = abs(r2 - 4.0/3.0) < 0.05
-            
+
             if is43_1 && !is43_2 { return true }
             if !is43_1 && is43_2 { return false }
 
-            // 4. 비디오 해상도는 너무 크지 않은 것 선호 (프리뷰 성능 및 발열 관리)
-            // 4K(8MP) vs FHD(2MP) -> 12MP 사진이 가능하다면 FHD가 더 가벼움
-            // 단, 사진 해상도가 같다면 비디오 해상도가 높은게 더 선명할 수 있음.
-            // 여기서는 사진 해상도가 같다는 전제이므로, 3MP 근처 선호(기존 로직 유지)
-            let p1 = Int(d1.width) * Int(d1.height)
-            let p2 = Int(d2.width) * Int(d2.height)
-            return abs(p1 - 3_000_000) < abs(p2 - 3_000_000)
+            // 3. 비디오 해상도는 적당한 크기 선호 (발열 관리)
+            let vp1 = Int(d1.width) * Int(d1.height)
+            let vp2 = Int(d2.width) * Int(d2.height)
+            return abs(vp1 - 3_000_000) < abs(vp2 - 3_000_000)
         }
 
         if let bestFormat = sortedFormats.first {
-            do {
-                try device.lockForConfiguration()
-                device.activeFormat = bestFormat
-                
-                // 설정된 포맷 정보 로그
-                let dim = CMVideoFormatDescriptionGetDimensions(bestFormat.formatDescription)
-                let maxPhoto = bestFormat.supportedMaxPhotoDimensions.last
-                print("✅ [설정됨] 포맷: Video=\(dim.width)x\(dim.height), Photo=\(maxPhoto?.width ?? 0)x\(maxPhoto?.height ?? 0)")
+            applyFormat(bestFormat, to: device)
 
-                // 🔥 60fps 설정 (안전하게 설정)
-                // 만약 60fps를 지원한다면 설정하고, 아니라면 최대 지원 FPS로 설정
-                if let maxFPSRange = bestFormat.videoSupportedFrameRateRanges.max(by: { $0.maxFrameRate < $1.maxFrameRate }) {
-                    // 고해상도(4K 이상)에서는 60fps가 발열을 유발하거나 불안정할 수 있음 -> 30fps로 fallback 고려 가능
-                    // 여기서는 지원 범위 내에서만 안전하게 설정
-                    let safeMaxFPS = maxFPSRange.maxFrameRate
-                    let verifyFPS = (safeMaxFPS >= 59.0) ? 60.0 : 30.0
-                    
-                    // 실제 설정 (Range 체크)
-                    if safeMaxFPS >= verifyFPS {
-                        device.activeVideoMinFrameDuration = CMTime(value: 1, timescale: CMTimeScale(verifyFPS))
-                        device.activeVideoMaxFrameDuration = CMTime(value: 1, timescale: CMTimeScale(verifyFPS))
-                        print("✅ [FPS 설정] Target: \(verifyFPS)fps (Max Support: \(safeMaxFPS))")
-                    } else {
-                        print("⚠️ [FPS 설정] 60fps 미지원 -> 기본값 유지 (Max: \(safeMaxFPS))")
-                    }
-                }
-                device.unlockForConfiguration()
-            } catch {
-                print("❌ 포맷 설정 실패 (Fig Error 가능성): \(error)")
+            // 캐시 저장
+            if device.position == .front {
+                cachedFrontFormat = bestFormat
+            } else {
+                cachedBackFormat = bestFormat
             }
+        }
+    }
+
+    /// 포맷을 디바이스에 적용 (FPS + 손떨림보정 포함)
+    private func applyFormat(_ format: AVCaptureDevice.Format, to device: AVCaptureDevice) {
+        do {
+            try device.lockForConfiguration()
+            device.activeFormat = format
+
+            // 포맷 정보 로그
+            let dim = CMVideoFormatDescriptionGetDimensions(format.formatDescription)
+            let maxPhoto = format.supportedMaxPhotoDimensions.last
+            logInfo("[Format] 설정됨: Video=\(dim.width)x\(dim.height), Photo=\(maxPhoto?.width ?? 0)x\(maxPhoto?.height ?? 0)", category: "Camera")
+
+            // FPS 설정
+            let targetFPS = Double(cameraSettings.fps)
+            if let maxFPSRange = format.videoSupportedFrameRateRanges.max(by: { $0.maxFrameRate < $1.maxFrameRate }) {
+                let safeFPS = min(targetFPS, maxFPSRange.maxFrameRate)
+                device.activeVideoMinFrameDuration = CMTime(value: 1, timescale: CMTimeScale(safeFPS))
+                device.activeVideoMaxFrameDuration = CMTime(value: 1, timescale: CMTimeScale(safeFPS))
+                logInfo("[FPS] Target: \(safeFPS)fps (Max Support: \(maxFPSRange.maxFrameRate))", category: "Camera")
+            }
+
+            // 손떨림 보정 (Stabilization)
+            let stabEnabled = (device.position == .front)
+                ? cameraSettings.frontStabilizationEnabled
+                : cameraSettings.backStabilizationEnabled
+            configureStabilization(for: device, enabled: stabEnabled)
+
+            device.unlockForConfiguration()
+        } catch {
+            logError("[Format] 포맷 설정 실패: \(error)", category: "Camera")
+        }
+    }
+
+    /// 손떨림 보정 설정
+    private func configureStabilization(for device: AVCaptureDevice, enabled: Bool) {
+        // activeVideoStabilizationMode는 Connection에서 설정해야 함
+        // 여기서는 device unlock 후 connection에서 설정
+        // → applyStabilizationToConnection에서 처리
+    }
+
+    /// 비디오 연결에 손떨림 보정 적용
+    private func applyStabilizationToConnection() {
+        guard let connection = videoOutput.connection(with: .video) else { return }
+
+        let stabEnabled = isFrontCamera
+            ? cameraSettings.frontStabilizationEnabled
+            : cameraSettings.backStabilizationEnabled
+
+        if stabEnabled {
+            if connection.isVideoStabilizationSupported {
+                connection.preferredVideoStabilizationMode = .auto
+                logInfo("[Stabilization] ON (auto)", category: "Camera")
+            }
+        } else {
+            connection.preferredVideoStabilizationMode = .off
+            logInfo("[Stabilization] OFF", category: "Camera")
         }
     }
 

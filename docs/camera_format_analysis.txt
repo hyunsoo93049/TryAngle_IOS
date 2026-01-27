@@ -1,0 +1,69 @@
+## Camera Format Analysis (iPhone Pro - BuiltInTripleCamera)
+## Date: 2026-01-28
+
+### 1. Runtime Configuration (실제 기기 로그)
+
+Video stream: 4032x3024 (12MP, 4:3)
+Photo capture: 5712x4284 (~24MP)
+FPS: 30fps (max 30fps for this format)
+Camera: BuiltInTripleCamera
+Zoom switchover: 2.0x (ultra-wide -> wide), 6.0x (wide -> telephoto)
+Zoom range: 1.0x - 30.0x
+
+### 2. Format Selection Priority (configureHighQualityFormat)
+
+| Priority | Criterion                        | Detail                                                |
+|----------|----------------------------------|-------------------------------------------------------|
+| 1st      | Photo resolution (highest wins)  | 12MP 4032 > 2MP 1920; threshold >100px difference     |
+| 2nd      | FPS (60fps preferred)            | maxFPS >= 59 wins                                     |
+| 3rd      | 4:3 aspect ratio preferred       | abs(ratio - 1.333) < 0.05                             |
+| 4th      | Video resolution ~3MP preferred  | abs(pixels - 3,000,000) minimized                     |
+
+Filter: height >= 720, pixel format 420YpCbCr8BiPlanar (VideoRange or FullRange)
+
+### 3. Format Contents (AVCaptureDevice.Format)
+
+Each format object contains:
+- Resolution (video): 4032x3024, 3840x2160, 1920x1080, 1280x720, 640x480
+- Resolution (photo): 5712x4284, 4032x3024
+- FPS: 30, 60, 120
+- Aspect ratio: 4:3, 16:9
+- HDR support: yes/no
+- Pixel format: 420v (VideoRange), 420f (FullRange)
+- Stabilization support: yes/no
+- Max zoom: varies
+
+iPhone devices: 50-100 format combinations per lens
+
+### 4. Camera Device Priority
+
+1. builtInTripleCamera    (3 lenses - Pro models)
+2. builtInDualWideCamera  (2 lenses)
+3. builtInDualCamera      (2 lenses)
+4. builtInWideAngleCamera (single lens, fallback)
+
+### 5. Reference Resolutions
+
+| Context                    | Resolution  | MP    | Aspect |
+|----------------------------|-------------|-------|--------|
+| Best video format selected | 4032x3024   | ~12MP | 4:3    |
+| Best photo format selected | 5712x4284   | ~24MP | 4:3    |
+| 4K video                   | 3840x2160   | ~8MP  | 16:9   |
+| FHD video                  | 1920x1080   | ~2MP  | 16:9   |
+| Default photo fallback     | 4032x3024   | ~12MP | 4:3    |
+| iOS stock camera (photo)   | 4032x3024   | 12MP  | 4:3    |
+| iOS stock camera (video)   | 1920x1080   | ~2MP  | 16:9   |
+
+### 6. Default Settings (CameraSettings)
+
+| Item          | Front Default | Back Default |
+|---------------|---------------|--------------|
+| Resolution    | 12MP          | 24MP         |
+| FPS           | 30            | 30           |
+| Stabilization | OFF           | ON           |
+
+### 7. Photo Output Configuration
+
+iOS 16+: photoOutput.maxPhotoDimensions = camera.activeFormat.supportedMaxPhotoDimensions.first
+Fallback: CMVideoDimensions(width: 4032, height: 3024)
+iOS < 16: photoOutput.isHighResolutionCaptureEnabled = true

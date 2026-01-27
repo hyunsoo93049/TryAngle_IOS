@@ -467,7 +467,8 @@ struct ContentView: View {
             SettingsSheet(
                 showGrid: $showGrid,
                 showFPS: $showFPS,
-                autoCapture: $autoCapture
+                autoCapture: $autoCapture,
+                cameraManager: cameraManager
             )
         }
         // 🆕 빠른 피드백 시트
