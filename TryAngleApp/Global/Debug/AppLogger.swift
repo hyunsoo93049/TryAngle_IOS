@@ -213,7 +213,7 @@ public class AppLogger {
                               function: String,
                               line: Int) -> String {
         let timestamp = formatTimestamp()
-        let levelName = String(format: "%-8s", level.displayName)
+        let levelName = level.displayName.padding(toLength: 8, withPad: " ", startingAt: 0)
         let categoryTag = "[\(category)]"
         
         #if DEBUG
