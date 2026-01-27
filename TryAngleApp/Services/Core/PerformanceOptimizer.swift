@@ -336,7 +336,7 @@ class PerformanceOptimizer {
 // MARK: - 동적 프레임 스킵 전략
 class AdaptiveFrameSkipper {
 
-    private let thermalManager = ThermalStateManager()
+    private let thermalManager = SystemMonitor.shared
 
     /// 현재 상태에 따른 Level별 실행 주기
     /// 🔧 Level 3 (Grounding DINO) 주기 단축하여 더 정교한 감지

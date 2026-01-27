@@ -11,7 +11,7 @@ struct ContentView: View {
     var isActiveTab: Bool = true  // 현재 탭이 활성화 상태인지 (MainTabView에서 전달)
     @StateObject private var cameraManager = CameraManager()
     @StateObject private var realtimeAnalyzer = AnalysisCoordinator()  // 실시간 분석 (리팩토링됨)
-    @StateObject private var thermalManager = ThermalStateManager()  // 🔥 발열/배터리 관리
+    @ObservedObject private var thermalManager = SystemMonitor.shared  // 🔥 발열/배터리 관리
     @State private var feedbackItems: [FeedbackItem] = []
     @State private var serverFeedbackItems: [FeedbackItem] = []  // 서버 피드백 (포즈 등)
     @State private var processingTime: String = ""
@@ -518,7 +518,7 @@ struct ContentView: View {
             }
         }
         // 🆕 시트/커버 열릴 때 분석 일시 중지 (UI 반응성 확보)
-        .onChange(of: showSettings) { isShown in
+        .onChange(of: showSettings) { _, isShown in
             if isShown {
                 print("⚙️ 설정 열림: 분석 일시 중지")
                 realtimeAnalyzer.pauseAnalysis()
@@ -527,16 +527,16 @@ struct ContentView: View {
                 realtimeAnalyzer.resumeAnalysis()
             }
         }
-        .onChange(of: showQuickFeedback) { isShown in
+        .onChange(of: showQuickFeedback) { _, isShown in
             if isShown { realtimeAnalyzer.pauseAnalysis() }
             else if isActiveTab && !showDetailedAnalysis { realtimeAnalyzer.resumeAnalysis() }
         }
-        .onChange(of: showDetailedAnalysis) { isShown in
+        .onChange(of: showDetailedAnalysis) { _, isShown in
             if isShown { realtimeAnalyzer.pauseAnalysis() }
             else if isActiveTab { realtimeAnalyzer.resumeAnalysis() }
         }
         // 🆕 ScenePhase Handling (Replaces NotificationCenter)
-        .onChange(of: scenePhase) { newPhase in
+        .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active {
                 print("☀️ 포어그라운드 진입: 카메라 및 분석 재개")
                 cameraManager.startSession()
@@ -810,7 +810,7 @@ struct LensSelector: View {
 // MARK: - Debug Overlay (성능 최적화: 별도 View로 분리)
 struct DebugOverlay: View {
     @ObservedObject var cameraManager: CameraManager
-    @ObservedObject var thermalManager: ThermalStateManager
+    @ObservedObject var thermalManager: SystemMonitor
     @ObservedObject var realtimeAnalyzer: AnalysisCoordinator
     let referenceImage: UIImage?
     let thermalStateEmoji: (ProcessInfo.ThermalState) -> String
