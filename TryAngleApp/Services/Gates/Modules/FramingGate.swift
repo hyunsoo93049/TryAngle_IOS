@@ -35,7 +35,7 @@ public class FramingGate: GateModule {
                 threshold: 0.75,
                 feedback: "피사체를 인식할 수 없습니다. 화면 중앙에 인물을 비춰주세요.",
                 icon: "🕵️",
-                category: "framing",
+                category: "no_person",
                 debugInfo: "No Subject Detected"
             )
         }

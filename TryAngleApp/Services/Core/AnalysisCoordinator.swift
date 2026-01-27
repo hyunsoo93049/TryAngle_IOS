@@ -66,6 +66,9 @@ final class AnalysisCoordinator: ObservableObject {
     // MARK: - Pipeline Setup
 
     private func setupPipeline() {
+        // 실시간 파이프라인에 RTMPoseService 등록
+        pipeline.poseDetector = RTMPoseService.shared
+
         // DetectionPipeline 결과 구독
         pipeline.resultPublisher
             .receive(on: processingQueue)

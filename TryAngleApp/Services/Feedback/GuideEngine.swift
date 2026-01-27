@@ -12,13 +12,11 @@ public class GuideEngine {
     
     /// GateEvaluation 결과를 바탕으로 사용자 가이드 생성
     public func process(evaluation: GateEvaluation) -> SimpleGuideResult {
-        // 1. 프레임 진입 체크 (Gate 1 No Person or Gate 4 No Person)
-        // Gate 1 Fail AND category == "no_person" or similar
-        // GateOrchestrator generates "no_person" feedback if missing.
-        // Let's check Gate 1 (Framing) and Gate 4 (Pose)
-        
-        // If Gate 1 explicitly says "no_person" in category/feedback, prioritize it.
-        if evaluation.gate1.category == "no_person" || evaluation.gate4.category == "pose_missing" {
+        // 1. 프레임 진입 체크 (모든 게이트에서 인물 미검출 확인)
+        let allGates = [evaluation.gate0, evaluation.gate1, evaluation.gate2, evaluation.gate3, evaluation.gate4]
+        let noPersonDetected = allGates.contains { $0.category == "no_person" || $0.category == "pose_missing" }
+
+        if noPersonDetected {
              return createGuideResult(
                 guide: .enterFrame,
                 magnitude: "",

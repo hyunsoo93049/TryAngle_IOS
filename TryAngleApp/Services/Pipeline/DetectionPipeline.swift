@@ -147,9 +147,9 @@ public class DetectionPipeline: ObservableObject {
 
         let (poseResult, depthResult, segResult) = await (poseTask, depthTask, segTask)
 
-        // 새 결과가 있으면 캐시 업데이트, 없으면 캐시 사용
-        if let pose = poseResult {
-            cachedPoseResult = pose
+        // 포즈: 새 결과가 있으면 캐시 업데이트, 없으면 캐시 비움 (사람 없음 = nil)
+        if shouldRunPose {
+            cachedPoseResult = poseResult  // nil이면 캐시도 nil로 비움
         }
         result.poseResult = cachedPoseResult
 
